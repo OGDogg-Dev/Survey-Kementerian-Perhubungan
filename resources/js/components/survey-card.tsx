@@ -2,8 +2,7 @@ import { Link } from "@inertiajs/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-
-declare function route(name: string, params?: unknown): string;
+import { routeOr } from "@/lib/route";
 
 type SurveyCardProps = {
   survey: {
@@ -35,14 +34,14 @@ export function SurveyCard({ survey }: SurveyCardProps) {
       </CardContent>
       <CardFooter className="justify-end gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link href={route("surveys.edit", survey.id)}>Edit</Link>
+          <Link href={routeOr("surveys.edit", survey.id, `/surveys/${survey.id}/edit`)}>Edit</Link>
         </Button>
         <Button asChild variant="outline" size="sm">
-          <Link href={route("surveys.responses", survey.id)}>Responses</Link>
+          <Link href={routeOr("surveys.responses", survey.id, `/surveys/${survey.id}/responses`)}>Responses</Link>
         </Button>
         {survey.status === "published" && (
           <Button asChild variant="link" size="sm">
-            <a href={route("run.show", survey.slug)} target="_blank" rel="noopener noreferrer">
+            <a href={routeOr("run.show", survey.slug, `/run/${survey.slug}`)} target="_blank" rel="noopener noreferrer">
               Open
             </a>
           </Button>

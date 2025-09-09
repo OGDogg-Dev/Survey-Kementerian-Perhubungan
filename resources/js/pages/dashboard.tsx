@@ -1,11 +1,9 @@
 import { Link, Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/AdminLayout";
-
-declare function route(name: string, params?: unknown): string;
+import { routeOr } from "@/lib/route";
 
 export default function Dashboard() {
-  const surveysIndex =
-    typeof route === "function" ? route("surveys.index") : "/surveys";
+  const surveysIndex = routeOr("surveys.index", undefined, "/surveys");
   return (
     <AdminLayout>
       <Head title="Dashboard" />

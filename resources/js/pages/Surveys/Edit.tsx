@@ -3,8 +3,7 @@ import AdminLayout from "@/layouts/AdminLayout";
 import { useMemo } from "react";
 import { SurveyCreatorComponent, SurveyCreator } from "survey-creator-react";
 import "survey-creator-core/survey-creator-core.min.css";
-
-declare function route(name: string, params?: unknown): string;
+import { routeOr } from "@/lib/route";
 
 type SurveyDTO = { id: number; title: string; schema_json: unknown } | null;
 
@@ -25,15 +24,18 @@ export default function Edit({ survey }: { survey: SurveyDTO }) {
       schema_json: creator.JSON
     };
     if (survey) {
-      router.put(route('surveys.update', survey.id), payload);
+      router.put(routeOr('surveys.update', survey.id, `/surveys/${survey.id}`), payload);
     } else {
-      router.post(route('surveys.store'), { ...payload, slug: slugify(payload.title) });
+      router.post(routeOr('surveys.store', undefined, '/surveys'), {
+        ...payload,
+        slug: slugify(payload.title)
+      });
     }
   };
 
   const onPublish = () => {
     if (!survey) return;
-    router.post(route('surveys.publish', survey.id));
+    router.post(routeOr('surveys.publish', survey.id, `/surveys/${survey.id}/publish`));
   };
 
   return (

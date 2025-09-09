@@ -1,13 +1,11 @@
 import { PropsWithChildren } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import type { SharedData } from "@/types";
-
-declare function route(name: string, params?: unknown): string;
+import { routeOr } from "@/lib/route";
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   const { auth } = usePage<SharedData>().props;
-  const surveysIndex =
-    typeof route === "function" ? route("surveys.index") : "/surveys";
+  const surveysIndex = routeOr("surveys.index", undefined, "/surveys");
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b bg-white">

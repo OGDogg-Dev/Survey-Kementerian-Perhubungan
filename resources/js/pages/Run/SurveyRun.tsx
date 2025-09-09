@@ -1,8 +1,7 @@
 import { Head, router, usePage } from "@inertiajs/react";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
-
-declare function route(name: string, params?: unknown): string;
+import { routeOr } from "@/lib/route";
 
 type PageProps = {
   survey: { id: number; title: string; slug: string; schema: unknown };
@@ -21,13 +20,16 @@ export default function SurveyRun() {
   model.onUploadFiles.add(async (_sender, opt) => {
     const form = new FormData();
     for (const file of opt.files) form.append("files[]", file);
-    const res = await fetch(route('upload.store'), { method: "POST", body: form, headers: { "X-Requested-With":"XMLHttpRequest" } });
+    const res = await fetch(
+      routeOr('upload.store', undefined, '/upload'),
+      { method: "POST", body: form, headers: { "X-Requested-With": "XMLHttpRequest" } }
+    );
     const data: { urls: string[] } = await res.json();
     opt.callback("success", data.urls.map(url => ({ file: { name: url, content: url } })));
   });
 
   const onComplete = (s: Model) => {
-    router.post(route("run.submit", survey.slug), {
+    router.post(routeOr("run.submit", survey.slug, `/run/${survey.slug}`), {
       answers: s.data,
       meta: { finishedAt: new Date().toISOString() }
     });
