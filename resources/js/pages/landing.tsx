@@ -12,7 +12,7 @@ export default function Landing({ surveys }: { surveys: { id: number; title: str
             <a
               key={survey.id}
               href={routeOr('run.show', survey.slug, `/s/${survey.slug}`)}
-              className="rounded-xl bg-white/10 p-6 backdrop-blur transition hover:bg-white/20 hover:shadow-[0_0_10px_#9333ea]"
+              className="glass rounded-xl p-6 transition hover:bg-white/20 hover:shadow-[0_0_10px_#9333ea]"
             >
               <h2 className="text-xl font-semibold">{survey.title}</h2>
               <p className="mt-2 text-sm opacity-75">Klik untuk memulai</p>
