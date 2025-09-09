@@ -41,7 +41,7 @@ export function SurveyCard({ survey }: SurveyCardProps) {
         </Button>
         {survey.status === "published" && (
           <Button asChild variant="link" size="sm">
-            <a href={routeOr("run.show", survey.slug, `/run/${survey.slug}`)} target="_blank" rel="noopener noreferrer">
+            <a href={routeOr("run.show", survey.slug, `/s/${survey.slug}`)} target="_blank" rel="noopener noreferrer">
               Open
             </a>
           </Button>

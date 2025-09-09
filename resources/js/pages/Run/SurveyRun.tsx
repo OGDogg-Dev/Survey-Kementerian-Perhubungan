@@ -29,7 +29,7 @@ export default function SurveyRun() {
   });
 
   const onComplete = (s: Model) => {
-    router.post(routeOr("run.submit", survey.slug, `/run/${survey.slug}`), {
+    router.post(routeOr("run.submit", survey.slug, `/s/${survey.slug}`), {
       answers: s.data,
       meta: { finishedAt: new Date().toISOString() }
     });
