@@ -17,7 +17,7 @@ export default function Edit({ survey }: { survey: SurveyDTO }) {
     });
     if (survey?.schema_json) c.JSON = survey.schema_json;
     return c;
-  }, [survey?.id, survey?.schema_json]);
+  }, [survey?.schema_json]);
 
   const onSave = () => {
     const payload = {
