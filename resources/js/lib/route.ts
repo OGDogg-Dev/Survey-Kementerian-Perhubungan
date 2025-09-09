@@ -5,7 +5,15 @@ export function routeOr(
   params?: unknown,
   fallback = '#'
 ): string {
-  const win = window as unknown as { route?: ZiggyRoute };
-  const ziggy = win.route;
-  return typeof ziggy === 'function' ? ziggy(name, params) : fallback;
+  try {
+    if (typeof window !== 'undefined') {
+      const ziggy = (window as unknown as { route?: ZiggyRoute }).route;
+      if (typeof ziggy === 'function') {
+        return ziggy(name, params);
+      }
+    }
+  } catch {
+    // ignore ziggy errors and fall back
+  }
+  return fallback;
 }
