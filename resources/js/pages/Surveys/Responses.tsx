@@ -1,7 +1,12 @@
-import AdminLayout from "@/Layouts/AdminLayout";
+import AdminLayout from "@/layouts/AdminLayout";
 import { Head, Link } from "@inertiajs/react";
 
-export default function Responses({ survey, responses }: any) {
+declare function route(name: string, params?: unknown): string;
+
+type ResponseRow = { id: number; response_uuid: string; submitted_at: string };
+type PageProps = { survey: { id: number; title: string }; responses: { data: ResponseRow[] } };
+
+export default function Responses({ survey, responses }: PageProps) {
   return (
     <AdminLayout>
       <Head title={`Responses — ${survey.title}`} />
@@ -22,7 +27,7 @@ export default function Responses({ survey, responses }: any) {
             </tr>
           </thead>
           <tbody>
-            {responses.data.map((r:any) => (
+            {responses.data.map((r) => (
               <tr key={r.id} className="border-t">
                 <td className="p-2">{r.response_uuid}</td>
                 <td className="p-2 text-center">{r.submitted_at}</td>

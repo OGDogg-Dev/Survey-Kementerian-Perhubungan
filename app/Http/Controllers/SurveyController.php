@@ -11,7 +11,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class SurveyController extends Controller
 {
     public function index() {
-        $surveys = Survey::latest()->select('id','title','slug','status','version','published_at','created_at')->get();
+        $surveys = Survey::select('id','title','slug','status','version','published_at','created_at')
+            ->withCount('responses')
+            ->latest()
+            ->get();
         return Inertia::render('Surveys/Index', compact('surveys'));
     }
 

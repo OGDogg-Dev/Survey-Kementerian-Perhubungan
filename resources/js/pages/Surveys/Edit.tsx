@@ -1,10 +1,12 @@
 import { Head, router } from "@inertiajs/react";
-import AdminLayout from "@/Layouts/AdminLayout";
+import AdminLayout from "@/layouts/AdminLayout";
 import { useMemo } from "react";
 import { SurveyCreatorComponent, SurveyCreator } from "survey-creator-react";
 import "survey-creator-core/survey-creator-core.min.css";
 
-type SurveyDTO = { id:number; title:string; schema_json:any } | null;
+declare function route(name: string, params?: unknown): string;
+
+type SurveyDTO = { id: number; title: string; schema_json: unknown } | null;
 
 export default function Edit({ survey }: { survey: SurveyDTO }) {
   const creator = useMemo<SurveyCreator>(() => {
@@ -15,7 +17,7 @@ export default function Edit({ survey }: { survey: SurveyDTO }) {
     });
     if (survey?.schema_json) c.JSON = survey.schema_json;
     return c;
-  }, [survey?.id]);
+  }, [survey?.id, survey?.schema_json]);
 
   const onSave = () => {
     const payload = {

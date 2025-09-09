@@ -5,16 +5,16 @@ import { Survey } from "survey-react-ui";
 declare function route(name: string, params?: unknown): string;
 
 type PageProps = {
-  survey: { id:number; title:string; slug:string; schema:any };
+  survey: { id: number; title: string; slug: string; schema: unknown };
   flash?: { ok?: string };
 };
 
 export default function SurveyRun() {
-  const { survey, flash } = usePage<PageProps>().props as any;
+  const { survey, flash } = usePage<PageProps>().props;
 
   const model = new Model({
     title: survey.title,
-    ...survey.schema
+    ...(survey.schema as Record<string, unknown>)
   });
   model.locale = "id";
 

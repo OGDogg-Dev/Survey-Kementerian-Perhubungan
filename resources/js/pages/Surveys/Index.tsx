@@ -1,46 +1,55 @@
+import { useState } from "react";
 import { Link, Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/AdminLayout";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { SurveyCard } from "@/components/survey-card";
 
 declare function route(name: string, params?: unknown): string;
 
-type SurveyRow = { id:number; title:string; slug:string; status:"draft"|"published"; version:number; published_at?: string; created_at:string; };
+type SurveyRow = {
+  id: number;
+  title: string;
+  slug: string;
+  status: "draft" | "published";
+  version: number;
+  responses_count: number;
+  published_at?: string;
+  created_at: string;
+};
 
-export default function Index({ surveys }:{ surveys: SurveyRow[] }) {
+export default function Index({ surveys }: { surveys: SurveyRow[] }) {
+  const [query, setQuery] = useState("");
+  const filtered = surveys.filter((s) =>
+    `${s.title} ${s.slug}`.toLowerCase().includes(query.toLowerCase())
+  );
+
   return (
     <AdminLayout>
       <Head title="Surveys" />
-      <div className="mb-4 flex justify-between">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-semibold">Surveys</h1>
-        <Link href={route('surveys.create')} className="px-3 py-2 rounded bg-blue-600 text-white">Buat Survei</Link>
+        <div className="flex w-full gap-2 sm:w-auto">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cari..."
+            className="sm:w-64"
+          />
+          <Button asChild>
+            <Link href={route("surveys.create")}>Buat Survei</Link>
+          </Button>
+        </div>
       </div>
-      <div className="bg-white rounded shadow">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2 text-left">Judul</th>
-              <th className="p-2">Status</th>
-              <th className="p-2">Version</th>
-              <th className="p-2">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {surveys.map(s => (
-              <tr key={s.id} className="border-t">
-                <td className="p-2">{s.title}<div className="text-xs text-gray-500">/{s.slug}</div></td>
-                <td className="p-2 text-center">{s.status}</td>
-                <td className="p-2 text-center">{s.version}</td>
-                <td className="p-2 text-right space-x-2">
-                  <Link href={route('surveys.edit', s.id)} className="text-blue-600">Edit</Link>
-                  <Link href={route('surveys.responses', s.id)} className="text-green-600">Responses</Link>
-                  {s.status === 'published' && (
-                    <a href={route('run.show', s.slug)} target="_blank" className="text-gray-700 underline">Open</a>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {filtered.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((s) => (
+            <SurveyCard key={s.id} survey={s} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">Tidak ada survei.</p>
+      )}
     </AdminLayout>
   );
 }

@@ -1,7 +1,12 @@
-import AdminLayout from "@/Layouts/AdminLayout";
+import AdminLayout from "@/layouts/AdminLayout";
 import { Head } from "@inertiajs/react";
 
-export default function ResponseShow({ survey, response }: any) {
+type Props = {
+  survey: { title: string };
+  response: { response_uuid: string; submitted_at: string; answers_json: unknown };
+};
+
+export default function ResponseShow({ survey, response }: Props) {
   return (
     <AdminLayout>
       <Head title={`Response — ${survey.title}`} />
