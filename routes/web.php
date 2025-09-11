@@ -2,22 +2,21 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Models\Survey;
+use App\Http\Controllers\SurveyAnalyticsController;
 
 Route::get('/', function () {
-    $surveys = Survey::where('status', 'published')
-        ->select('id', 'title', 'slug')
-        ->get();
-
-    return Inertia::render('landing', [
-        'surveys' => $surveys,
-    ]);
+    return Inertia::render('welcome');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+});
+
+Route::middleware(['auth', 'verified', 'admin'])->group(function () {
+    Route::get('/surveys/{survey}/analytics', [SurveyAnalyticsController::class, 'show'])
+        ->name('surveys.analytics');
 });
 
 require __DIR__.'/settings.php';
