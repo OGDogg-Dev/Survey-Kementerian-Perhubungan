@@ -68,6 +68,13 @@ export default function SurveyRun() {
           <AlertDescription>{flash.ok}</AlertDescription>
         </Alert>
       )}
+      {/* Header progress (Lime solid bar) */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">Langkah {pageNo + 1} / {pageCount}</div>
+        <div className="h-1.5 w-40 rounded-full bg-muted/60">
+          <div className="runner-progress h-full rounded-full" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle className="text-center text-xl">{survey.title}</CardTitle>
