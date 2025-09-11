@@ -1,5 +1,4 @@
 import '../css/app.css';
-import '@/styles/theme.lime.css';
 
 // SurveyJS CSS (disable source maps to avoid 404 errors)
 import 'survey-core/survey-core.css';

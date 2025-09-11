@@ -154,6 +154,44 @@
 }
 
 @layer utilities {
+    /* Landing-like background surface applied globally */
+    .surface-landing {
+        /* Override tokens to dark, matching landing look */
+        --background: oklch(0.145 0 0);
+        --foreground: oklch(0.985 0 0);
+        --card: oklch(0.145 0 0);
+        --card-foreground: oklch(0.985 0 0);
+        --popover: oklch(0.145 0 0);
+        --popover-foreground: oklch(0.985 0 0);
+        --primary: oklch(0.73 0.22 320);
+        --primary-foreground: oklch(0.145 0 0);
+        --secondary: oklch(0.269 0 0);
+        --secondary-foreground: oklch(0.985 0 0);
+        --muted: oklch(0.269 0 0);
+        --muted-foreground: oklch(0.708 0 0);
+        --destructive: oklch(0.396 0.141 25.723);
+        --destructive-foreground: oklch(0.985 0 0);
+        --border: oklch(0.269 0 0);
+        --input: oklch(0.269 0 0);
+        --ring: oklch(0.439 0 0);
+        --sidebar: var(--background);
+        --sidebar-foreground: var(--foreground);
+        --sidebar-primary: var(--primary);
+        --sidebar-primary-foreground: var(--primary-foreground);
+        --sidebar-accent: var(--secondary);
+        --sidebar-accent-foreground: var(--secondary-foreground);
+        --sidebar-border: var(--border);
+        --sidebar-ring: var(--ring);
+
+        background-color: var(--background);
+        background-image:
+            radial-gradient(1000px 600px at 10% 10%, color-mix(in oklch, oklch(0.65 0.2 325), transparent 82%), transparent 60%),
+            radial-gradient(800px 400px at 90% 20%, color-mix(in oklch, oklch(0.6 0.1 255), transparent 84%), transparent 60%),
+            linear-gradient(135deg, color-mix(in oklch, var(--background), black 6%), color-mix(in oklch, var(--background), black 8%));
+        background-attachment: fixed;
+        color: var(--foreground);
+    }
+
     .glass {
         @apply bg-white/10 backdrop-blur border border-white/20;
     }
