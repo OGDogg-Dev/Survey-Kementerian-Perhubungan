@@ -1,8 +1,7 @@
 import { Head, router, usePage } from "@inertiajs/react";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
-
-declare function route(name: string, params?: unknown): string;
+import { routeOr } from "@/lib/route";
 
 type PageProps = {
   survey: { id: number; title: string; slug: string; schema: unknown };
@@ -21,13 +20,16 @@ export default function SurveyRun() {
   model.onUploadFiles.add(async (_sender, opt) => {
     const form = new FormData();
     for (const file of opt.files) form.append("files[]", file);
-    const res = await fetch(route('upload.store'), { method: "POST", body: form, headers: { "X-Requested-With":"XMLHttpRequest" } });
+    const res = await fetch(
+      routeOr('upload.store', undefined, '/upload'),
+      { method: "POST", body: form, headers: { "X-Requested-With": "XMLHttpRequest" } }
+    );
     const data: { urls: string[] } = await res.json();
     opt.callback("success", data.urls.map(url => ({ file: { name: url, content: url } })));
   });
 
   const onComplete = (s: Model) => {
-    router.post(route("run.submit", survey.slug), {
+    router.post(routeOr("run.submit", survey.slug, `/s/${survey.slug}`), {
       answers: s.data,
       meta: { finishedAt: new Date().toISOString() }
     });
@@ -36,8 +38,14 @@ export default function SurveyRun() {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <Head title={survey.title} />
-      {flash?.ok && <div className="mb-4 rounded bg-green-100 p-3">{flash.ok}</div>}
-      <Survey model={model} onComplete={onComplete} />
+      {flash?.ok && (
+        <div className="mb-4 glass rounded p-3 text-sm text-green-300">
+          {flash.ok}
+        </div>
+      )}
+      <div className="glass rounded-xl p-6">
+        <Survey model={model} onComplete={onComplete} />
+      </div>
     </div>
   );
 }

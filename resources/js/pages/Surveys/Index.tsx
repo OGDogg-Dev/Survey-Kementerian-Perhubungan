@@ -4,8 +4,7 @@ import AdminLayout from "@/layouts/AdminLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SurveyCard } from "@/components/survey-card";
-
-declare function route(name: string, params?: unknown): string;
+import { routeOr } from "@/lib/route";
 
 type SurveyRow = {
   id: number;
@@ -37,7 +36,7 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
             className="sm:w-64"
           />
           <Button asChild>
-            <Link href={route("surveys.create")}>Buat Survei</Link>
+            <Link href={routeOr("surveys.create", undefined, "/surveys/create")}>Buat Survei</Link>
           </Button>
         </div>
       </div>

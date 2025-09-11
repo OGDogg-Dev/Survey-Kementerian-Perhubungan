@@ -6,8 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
-import { request } from '@/routes/password';
+import { routeOr } from '@/lib/route';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
@@ -44,7 +43,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 <div className="flex items-center">
                                     <Label htmlFor="password">Password</Label>
                                     {canResetPassword && (
-                                        <TextLink href={request()} className="ml-auto text-sm" tabIndex={5}>
+                                        <TextLink
+                                            href={routeOr('password.request', undefined, '/forgot-password')}
+                                            className="ml-auto text-sm"
+                                            tabIndex={5}
+                                        >
                                             Forgot password?
                                         </TextLink>
                                     )}
@@ -74,7 +77,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
                         <div className="text-center text-sm text-muted-foreground">
                             Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5}>
+                            <TextLink href={routeOr('register', undefined, '/register')} tabIndex={5}>
                                 Sign up
                             </TextLink>
                         </div>
