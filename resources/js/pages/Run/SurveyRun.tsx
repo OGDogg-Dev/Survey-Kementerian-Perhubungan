@@ -38,8 +38,14 @@ export default function SurveyRun() {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <Head title={survey.title} />
-      {flash?.ok && <div className="mb-4 rounded bg-green-100 p-3">{flash.ok}</div>}
-      <Survey model={model} onComplete={onComplete} />
+      {flash?.ok && (
+        <div className="mb-4 glass rounded p-3 text-sm text-green-300">
+          {flash.ok}
+        </div>
+      )}
+      <div className="glass rounded-xl p-6">
+        <Survey model={model} onComplete={onComplete} />
+      </div>
     </div>
   );
 }
