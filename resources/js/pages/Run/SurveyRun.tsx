@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 type PageProps = {
   survey: { id: number; title: string; slug: string; schema: unknown };
@@ -22,6 +23,9 @@ export default function SurveyRun() {
     });
     m.locale = "id";
     m.showTitle = false;
+    // Hide built-in Next/Prev since we have a sticky navbar below
+    // @ts-ignore - string union supported by SurveyJS ('none'|'top'|'bottom'|'both')
+    (m as any).showNavigationButtons = 'none';
     return m;
   }, [survey]);
 
@@ -38,16 +42,43 @@ export default function SurveyRun() {
     return () => model.onCurrentPageChanged.remove(handler);
   }, [model]);
 
-  model.onUploadFiles.add(async (_sender, opt) => {
-    const form = new FormData();
-    for (const file of opt.files) form.append("files[]", file);
-    const res = await fetch(
-      routeOr('upload.store', undefined, '/upload'),
-      { method: "POST", body: form, headers: { "X-Requested-With": "XMLHttpRequest" } }
-    );
-    const data: { urls: string[] } = await res.json();
-    opt.callback("success", data.urls.map(url => ({ file: { name: url, content: url } })));
-  });
+  const pct = Math.round(((pageNo + 1) / Math.max(1, pageCount)) * 100);
+  const canPrev = pageNo > 0;
+  const isLast = pageNo === pageCount - 1;
+
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (isLast) model.doComplete(); else model.nextPage();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (canPrev) model.prevPage();
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (isLast) model.doComplete(); else model.nextPage();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [model, isLast, canPrev]);
+
+  useEffect(() => {
+    const handler = async (_sender: any, opt: any) => {
+      const form = new FormData();
+      for (const file of opt.files) form.append("files[]", file);
+      const res = await fetch(routeOr('upload.store', undefined, '/upload'), {
+        method: 'POST',
+        body: form,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data: { urls: string[] } = await res.json();
+      opt.callback('success', data.urls.map((url) => ({ file: { name: url, content: url } })));
+    };
+    model.onUploadFiles.add(handler);
+    return () => { model.onUploadFiles.remove(handler); };
+  }, [model]);
 
   const onComplete = (s: Model) => {
     router.post(routeOr("run.submit", survey.slug, `/run/${survey.slug}`), {
@@ -55,10 +86,6 @@ export default function SurveyRun() {
       meta: { finishedAt: new Date().toISOString() }
     });
   };
-
-  const pct = Math.round(((pageNo + 1) / Math.max(1, pageCount)) * 100);
-  const canPrev = pageNo > 0;
-  const isLast = pageNo === pageCount - 1;
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
@@ -80,7 +107,17 @@ export default function SurveyRun() {
           <CardTitle className="text-center text-xl">{survey.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Survey model={model} onComplete={onComplete} />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pageNo}
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -12 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              <Survey model={model} onComplete={onComplete} />
+            </motion.div>
+          </AnimatePresence>
         </CardContent>
       </Card>
       {/* Sticky bottom bar */}

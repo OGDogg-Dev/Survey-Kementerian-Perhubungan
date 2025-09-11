@@ -18,7 +18,7 @@ export default function ResponseShow({ survey, response }: Props) {
   return (
     <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title={`Respon - ${survey.title}`} />
-      <Card>
+      <Card className="card-accent">
         <CardHeader>
           <CardTitle>Detail Response</CardTitle>
         </CardHeader>

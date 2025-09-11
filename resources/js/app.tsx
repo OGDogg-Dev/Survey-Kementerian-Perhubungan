@@ -3,7 +3,7 @@ import '@/styles/theme.lime.css';
 
 // SurveyJS CSS (disable source maps to avoid 404 errors)
 import 'survey-core/survey-core.css';
-import 'survey-creator-core/survey-creator-core.css';
+// creator CSS is loaded dynamically only on the editor page
 
 // Override source map URLs to prevent 404 errors
 const style = document.createElement('style');

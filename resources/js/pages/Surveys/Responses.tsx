@@ -36,7 +36,7 @@ export default function Responses({ survey, responses }: PageProps) {
           </Button>
         </div>
       </div>
-      <Card>
+      <Card className="card-accent">
         <CardHeader>
           <CardTitle>Daftar Respon</CardTitle>
         </CardHeader>

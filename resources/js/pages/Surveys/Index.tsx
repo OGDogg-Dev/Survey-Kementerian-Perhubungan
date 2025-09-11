@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search } from "lucide-react";
 import { usePageLoading } from "@/hooks/use-page-loading";
 import { SurveysIndexSkeleton } from "@/components/skeletons/surveys-index-skeleton";
+import { AnimatePresence, motion } from "framer-motion";
 
 type SurveyRow = {
   id: number;
@@ -34,6 +35,10 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
       if (e.key === "/") {
         e.preventDefault();
         searchRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        setQuery("");
+        searchRef.current?.blur();
       }
       if ((e.key === "n" || e.key === "N") && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
@@ -111,11 +116,25 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
       {isLoading ? (
         <SurveysIndexSkeleton />
       ) : filtered.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((s) => (
-            <SurveyCard key={s.id} survey={s} showAnalytics />
-          ))}
-        </div>
+        <>
+          <div className="mb-2 text-xs text-muted-foreground">{filtered.length} hasil</div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence>
+              {filtered.map((s) => (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  whileHover={{ y: -2 }}
+                >
+                  <SurveyCard survey={s} showAnalytics />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-10 text-center">
           <div className="mb-2 text-2xl">🗂️</div>
