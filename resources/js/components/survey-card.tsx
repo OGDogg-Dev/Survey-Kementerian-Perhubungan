@@ -1,7 +1,14 @@
 import { Link } from "@inertiajs/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 declare function route(name: string, params?: unknown): string;
 
@@ -14,9 +21,10 @@ type SurveyCardProps = {
     version: number;
     responses_count: number;
   };
+  showAnalytics?: boolean;
 };
 
-export function SurveyCard({ survey }: SurveyCardProps) {
+export function SurveyCard({ survey, showAnalytics = false }: SurveyCardProps) {
   const statusVariant = survey.status === "published" ? "default" : "secondary";
   return (
     <Card>
@@ -40,9 +48,18 @@ export function SurveyCard({ survey }: SurveyCardProps) {
         <Button asChild variant="outline" size="sm">
           <Link href={route("surveys.responses", survey.id)}>Responses</Link>
         </Button>
+        {showAnalytics && (
+          <Button asChild variant="outline" size="sm">
+            <Link href={route("surveys.analytics", survey.id)}>Analytics</Link>
+          </Button>
+        )}
         {survey.status === "published" && (
           <Button asChild variant="link" size="sm">
-            <a href={route("run.show", survey.slug)} target="_blank" rel="noopener noreferrer">
+            <a
+              href={route("run.show", survey.slug)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Open
             </a>
           </Button>
