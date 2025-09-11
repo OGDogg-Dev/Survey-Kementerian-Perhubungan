@@ -3,9 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SurveyAnalyticsController;
+use App\Models\Survey;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    $surveys = Survey::published()
+        ->select('id', 'title', 'slug')
+        ->latest()
+        ->get();
+
+    return Inertia::render('landing', [
+        'surveys' => $surveys,
+    ]);
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
