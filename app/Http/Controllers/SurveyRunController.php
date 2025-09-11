@@ -12,6 +12,10 @@ class SurveyRunController extends Controller
 {
     public function show($slug) {
         $survey = Survey::where('status','published')->where('slug',$slug)->firstOrFail();
+        $now = now();
+        if (($survey->start_at && $now->lt($survey->start_at)) || ($survey->end_at && $now->gt($survey->end_at))) {
+            abort(404);
+        }
         return Inertia::render('Run/SurveyRun', [
             'survey' => [
                 'id' => $survey->id,

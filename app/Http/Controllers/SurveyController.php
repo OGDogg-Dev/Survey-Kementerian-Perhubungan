@@ -27,6 +27,8 @@ class SurveyController extends Controller
             'title' => 'required|string|max:160',
             'slug' => 'required|string|alpha_dash|unique:surveys,slug|max:160',
             'schema_json' => 'required|array',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date|after:start_at',
         ]);
         $data['created_by'] = $r->user()?->id;
         $survey = Survey::create($data);
@@ -41,7 +43,9 @@ class SurveyController extends Controller
         $data = $r->validate([
             'title' => 'required|string|max:160',
             'schema_json' => 'required|array',
-            'status' => 'in:draft,published'
+            'status' => 'in:draft,published',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date|after:start_at',
         ]);
         $survey->update($data);
         return back()->with('ok','Saved');

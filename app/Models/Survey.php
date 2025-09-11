@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Survey extends Model
 {
     protected $fillable = [
-        'title','slug','schema_json','status','version','created_by','published_at'
+        'title','slug','schema_json','status','version','created_by','published_at','start_at','end_at'
     ];
 
     protected $casts = [
         'schema_json' => 'array',
         'published_at' => 'datetime',
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
     ];
 
     public function responses() {

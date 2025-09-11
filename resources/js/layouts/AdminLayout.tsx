@@ -1,6 +1,7 @@
 import { PropsWithChildren } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import type { SharedData } from "@/types";
+declare function route(name: string, params?: unknown): string;
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   const { auth } = usePage<SharedData>().props;
