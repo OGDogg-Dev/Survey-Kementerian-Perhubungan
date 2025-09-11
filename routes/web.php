@@ -5,7 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\SurveyAnalyticsController;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return Inertia::render('landing');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
