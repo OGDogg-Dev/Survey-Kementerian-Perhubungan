@@ -16,6 +16,7 @@ export default function SurveyRun() {
     ...(survey.schema as Record<string, unknown>)
   });
   model.locale = "id";
+  model.showTitle = false;
 
   model.onUploadFiles.add(async (_sender, opt) => {
     const form = new FormData();
@@ -39,7 +40,10 @@ export default function SurveyRun() {
     <div className="max-w-3xl mx-auto p-6">
       <Head title={survey.title} />
       {flash?.ok && <div className="mb-4 rounded bg-green-100 p-3">{flash.ok}</div>}
-      <Survey model={model} onComplete={onComplete} />
+      <h1 className="text-3xl font-bold mb-6 text-center">{survey.title}</h1>
+      <div className="bg-white rounded-lg shadow p-6">
+        <Survey model={model} onComplete={onComplete} />
+      </div>
     </div>
   );
 }

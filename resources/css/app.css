@@ -171,3 +171,16 @@
         box-shadow: 0 0 15px rgba(147, 51, 234, 0.6), 0 0 30px rgba(147, 51, 234, 0.4);
     }
 }
+
+@layer components {
+    .sv-rating__item .sv-rating__icon {
+        @apply text-gray-300;
+    }
+    .sv-rating__item--selected .sv-rating__icon,
+    .sv-rating__item:hover .sv-rating__icon {
+        @apply text-yellow-400;
+    }
+    .sv-btn {
+        @apply bg-primary text-primary-foreground rounded px-4 py-2;
+    }
+}
