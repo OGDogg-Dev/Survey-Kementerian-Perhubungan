@@ -11,12 +11,12 @@ export default function Dashboard() {
         <h1 className="text-xl font-semibold">Dashboard</h1>
         <Link
           href={surveysIndex}
-          className="neon-hover rounded bg-indigo-600 px-3 py-2 text-white"
+          className="px-3 py-2 rounded bg-blue-600 text-white"
         >
           Manage Surveys
         </Link>
       </div>
-      <div className="glass neon-hover rounded p-4">
+      <div className="bg-white rounded shadow p-4">
         <p>
           Welcome to the Survey Dashboard. Use the button above to manage
           surveys and view responses.

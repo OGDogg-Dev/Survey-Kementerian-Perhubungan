@@ -29,7 +29,7 @@ export default function SurveyRun() {
   });
 
   const onComplete = (s: Model) => {
-    router.post(routeOr("run.submit", survey.slug, `/s/${survey.slug}`), {
+    router.post(routeOr("run.submit", survey.slug, `/run/${survey.slug}`), {
       answers: s.data,
       meta: { finishedAt: new Date().toISOString() }
     });
@@ -38,14 +38,8 @@ export default function SurveyRun() {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <Head title={survey.title} />
-      {flash?.ok && (
-        <div className="mb-4 glass rounded p-3 text-sm text-green-300">
-          {flash.ok}
-        </div>
-      )}
-      <div className="glass rounded-xl p-6">
-        <Survey model={model} onComplete={onComplete} />
-      </div>
+      {flash?.ok && <div className="mb-4 rounded bg-green-100 p-3">{flash.ok}</div>}
+      <Survey model={model} onComplete={onComplete} />
     </div>
   );
 }
