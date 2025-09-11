@@ -1,0 +1,44 @@
+/* Lime (Fruity-like) theme overrides and utilities */
+
+/* Scope all overrides under .theme-lime on <html> */
+.theme-lime {
+  /* Primary: lively lime/emerald tone; Accent: gold */
+  --primary: oklch(0.73 0.16 144);
+  --primary-foreground: oklch(0.145 0 0);
+  --accent: oklch(0.78 0.18 85);
+  --accent-foreground: oklch(0.205 0 0);
+  /* Slightly larger default radius to feel softer */
+  --radius: 0.75rem;
+}
+
+/* Card green accent bar like LimeSurvey */
+.theme-lime .card-accent {
+  position: relative;
+  overflow: clip;
+}
+.theme-lime .card-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--primary);
+}
+
+/* Status badges */
+.theme-lime .badge-published {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: transparent !important;
+}
+.theme-lime .badge-draft {
+  background-color: var(--muted) !important;
+  color: var(--muted-foreground) !important;
+  border-color: transparent !important;
+}
+
+/* Optional helper if you want solid primary buttons via class */
+.theme-lime .btn-primary {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+

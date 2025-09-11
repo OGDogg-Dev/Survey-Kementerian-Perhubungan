@@ -28,13 +28,16 @@ type SurveyCardProps = {
 export function SurveyCard({ survey, showAnalytics = false }: SurveyCardProps) {
   const statusVariant = survey.status === "published" ? "default" : "secondary";
   return (
-    <Card>
+    <Card className="card-accent">
       <CardHeader className="flex flex-row justify-between gap-2">
         <div>
           <CardTitle className="text-base">{survey.title}</CardTitle>
           <CardDescription>/{survey.slug}</CardDescription>
         </div>
-        <Badge variant={statusVariant} className="capitalize">
+        <Badge
+          variant={statusVariant}
+          className={`capitalize ${survey.status === 'published' ? 'badge-published' : 'badge-draft'}`}
+        >
           {survey.status}
         </Badge>
       </CardHeader>

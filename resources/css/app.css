@@ -185,3 +185,35 @@
         @apply bg-primary text-primary-foreground rounded px-4 py-2;
     }
 }
+
+/* NProgress styling */
+#nprogress { pointer-events: none; z-index: 9999; }
+#nprogress .bar {
+  background: var(--primary) !important;
+  height: 3px !important;
+}
+#nprogress .spinner { display: none !important; }
+#nprogress .peg { box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary) !important; }
+
+/* Enhanced animation & sheen */
+@keyframes nprogress-gradient { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+#nprogress .bar {
+  background-image: linear-gradient(90deg, var(--primary) 0%, color-mix(in oklch, var(--primary), white 18%) 50%, var(--primary) 100%) !important;
+  background-size: 200% 100%;
+  animation: nprogress-gradient 1.5s linear infinite;
+}
+#nprogress .bar::after {
+  content: "";
+  position: absolute; right: 0; top: 0; height: 100%; width: 120px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  filter: blur(4px); opacity: .8;
+}
+
+/* Blur the app topbar while loading */
+body.nprogress-busy [data-app-topbar] {
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  transition: background-color .2s ease, backdrop-filter .2s ease;
+  background-color: color-mix(in oklch, var(--background), white 8%);
+}
+

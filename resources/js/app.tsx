@@ -1,4 +1,5 @@
 import '../css/app.css';
+import '@/styles/theme.lime.css';
 
 // SurveyJS CSS (disable source maps to avoid 404 errors)
 import 'survey-core/survey-core.css';
@@ -20,6 +21,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 import { ErrorBoundary } from './components/error-boundary';
+import AppProviders from './providers/AppProviders';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -31,12 +33,16 @@ createInertiaApp({
 
         root.render(
             <ErrorBoundary>
-                <App {...props} />
+                <AppProviders>
+                    <App {...props} />
+                </AppProviders>
             </ErrorBoundary>,
         );
     },
     progress: {
-        color: '#4B5563',
+        color: '#2563eb',
+        showSpinner: false,
+        delay: 150,
     },
 });
 
