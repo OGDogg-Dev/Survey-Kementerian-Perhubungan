@@ -9,8 +9,9 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { routeOr } from "@/lib/route";
 
-declare function route(name: string, params?: unknown): string;
+// Avoid relying on a global `route()`; use routeOr with sensible fallbacks.
 
 type SurveyCardProps = {
   survey: {
@@ -43,24 +44,24 @@ export function SurveyCard({ survey, showAnalytics = false }: SurveyCardProps) {
       </CardContent>
       <CardFooter className="justify-end gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link href={route("surveys.edit", survey.id)}>Edit</Link>
+          <Link href={routeOr("surveys.edit", survey.id, `/surveys/${survey.id}/edit`)}>Ubah</Link>
         </Button>
         <Button asChild variant="outline" size="sm">
-          <Link href={route("surveys.responses", survey.id)}>Responses</Link>
+          <Link href={routeOr("surveys.responses", survey.id, `/surveys/${survey.id}/responses`)}>Respon</Link>
         </Button>
         {showAnalytics && (
           <Button asChild variant="outline" size="sm">
-            <Link href={route("surveys.analytics", survey.id)}>Analytics</Link>
+            <Link href={routeOr("surveys.analytics", survey.id, `/surveys/${survey.id}/analytics`)}>Analitik</Link>
           </Button>
         )}
         {survey.status === "published" && (
           <Button asChild variant="link" size="sm">
             <a
-              href={route("run.show", survey.slug)}
+              href={routeOr("run.show", survey.slug, `/s/${survey.slug}`)}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Open
+              Buka
             </a>
           </Button>
         )}

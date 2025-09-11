@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { routeOr } from '@/lib/route';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ListChecks } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -13,6 +13,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: routeOr('dashboard', undefined, '/dashboard'),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Survei',
+        href: routeOr('surveys.index', undefined, '/surveys'),
+        icon: ListChecks,
     },
 ];
 

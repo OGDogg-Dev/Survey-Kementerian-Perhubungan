@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import { SurveyCreatorComponent, SurveyCreator } from "survey-creator-react";
 import "survey-creator-core/survey-creator-core.min.css";
 import { routeOr } from "@/lib/route";
+import { Button } from "@/components/ui/button";
+import type { BreadcrumbItem } from "@/types";
 
 type SurveyDTO = { id: number; title: string; schema_json: unknown } | null;
 
@@ -38,14 +40,26 @@ export default function Edit({ survey }: { survey: SurveyDTO }) {
     router.post(routeOr('surveys.publish', survey.id, `/surveys/${survey.id}/publish`));
   };
 
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: "Dashboard", href: routeOr("dashboard", undefined, "/dashboard") },
+    { title: "Survei", href: routeOr("surveys.index", undefined, "/surveys") },
+    { title: survey ? `Edit: ${survey.title}` : "Buat Survei", href: "#" },
+  ];
+
   return (
-    <AdminLayout>
+    <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title={survey ? `Edit: ${survey.title}` : "Buat Survei"} />
       <div className="mb-4 flex gap-2">
-        <button onClick={onSave} className="px-4 py-2 rounded bg-blue-600 text-white">Simpan</button>
-        {survey && <button onClick={onPublish} className="px-4 py-2 rounded bg-green-600 text-white">Publish</button>}
+        <Button onClick={onSave}>Simpan</Button>
+        {survey && (
+          <Button variant="secondary" onClick={onPublish}>
+            Terbitkan
+          </Button>
+        )}
       </div>
-      <SurveyCreatorComponent creator={creator} />
+      <div className="rounded-xl border border-border bg-background p-2">
+        <SurveyCreatorComponent creator={creator} />
+      </div>
     </AdminLayout>
   );
 }

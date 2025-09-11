@@ -1,27 +1,39 @@
 import { Link, Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/AdminLayout";
 import { routeOr } from "@/lib/route";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { BreadcrumbItem } from "@/types";
 
 export default function Dashboard() {
   const surveysIndex = routeOr("surveys.index", undefined, "/surveys");
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: "Dashboard", href: routeOr("dashboard", undefined, "/dashboard") },
+  ];
   return (
-    <AdminLayout>
+    <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <div className="mb-4 flex justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold">Dashboard</h1>
-        <Link
-          href={surveysIndex}
-          className="px-3 py-2 rounded bg-blue-600 text-white"
-        >
-          Manage Surveys
-        </Link>
+        <Button asChild>
+          <Link href={surveysIndex}>Kelola Survei</Link>
+        </Button>
       </div>
-      <div className="bg-white rounded shadow p-4">
-        <p>
-          Welcome to the Survey Dashboard. Use the button above to manage
-          surveys and view responses.
-        </p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Selamat datang di Dashboard Survei</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Akses cepat untuk membuat, mengedit, mempublikasikan, dan menganalisis survei.
+          </p>
+          <div>
+            <Button asChild>
+              <Link href={surveysIndex}>Lihat daftar survei</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </AdminLayout>
   );
 }

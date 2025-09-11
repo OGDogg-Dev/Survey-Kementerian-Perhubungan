@@ -2,6 +2,9 @@ import { Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/AdminLayout";
 import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { routeOr } from "@/lib/route";
+import type { BreadcrumbItem } from "@/types";
 
 type AnalyticsData = {
   counts: Record<string, number>;
@@ -15,43 +18,54 @@ type Props = {
 };
 
 export default function Analytics({ survey, analytics }: Props) {
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: "Dashboard", href: routeOr("dashboard", undefined, "/dashboard") },
+    { title: "Survei", href: routeOr("surveys.index", undefined, "/surveys") },
+    { title: `Analitik: ${survey.title}`, href: routeOr("surveys.analytics", survey.id, `/surveys/${survey.id}/analytics`) },
+  ];
   const charts = Object.entries(analytics).map(([key, data]) => {
     const labels = Object.keys(data.counts);
     const values = Object.values(data.counts);
     return (
-      <div key={key} className="mb-8">
-        <h2 className="mb-2 font-medium">{data.title ?? key}</h2>
-        {labels.length > 0 ? (
-          <Bar
-            data={{
-              labels,
-              datasets: [
-                {
-                  label: "Responses",
-                  data: values,
-                  backgroundColor: "rgba(59,130,246,0.5)",
-                },
-              ],
-            }}
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">No data</p>
-        )}
-        {data.average !== null && (
-          <p className="mt-2 text-sm">Average: {data.average.toFixed(2)}</p>
-        )}
-      </div>
+      <Card key={key} className="mb-6">
+        <CardHeader>
+          <CardTitle>{data.title ?? key}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {labels.length > 0 ? (
+            <Bar
+              data={{
+                labels,
+                datasets: [
+                  {
+                    label: "Respon",
+                    data: values,
+                    backgroundColor: "rgba(59,130,246,0.6)",
+                  },
+                ],
+              }}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">Tidak ada data.</p>
+          )}
+          {data.average !== null && (
+            <p className="mt-3 text-sm text-muted-foreground">Rata-rata: {data.average.toFixed(2)}</p>
+          )}
+        </CardContent>
+      </Card>
     );
   });
 
   return (
-    <AdminLayout>
-      <Head title={`Analytics - ${survey.title}`} />
-      <h1 className="mb-4 text-xl font-semibold">
-        Analytics for {survey.title}
-      </h1>
+    <AdminLayout breadcrumbs={breadcrumbs}>
+      <Head title={`Analitik - ${survey.title}`} />
+      <h1 className="mb-6 text-xl font-semibold">Analitik - {survey.title}</h1>
       {charts.length > 0 ? charts : (
-        <p className="text-sm text-muted-foreground">No analytics available.</p>
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-muted-foreground">Belum ada data analitik.</p>
+          </CardContent>
+        </Card>
       )}
     </AdminLayout>
   );

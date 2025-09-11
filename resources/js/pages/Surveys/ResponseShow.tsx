@@ -1,5 +1,8 @@
 import AdminLayout from "@/layouts/AdminLayout";
 import { Head } from "@inertiajs/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { routeOr } from "@/lib/route";
+import type { BreadcrumbItem } from "@/types";
 
 type Props = {
   survey: { title: string };
@@ -7,17 +10,28 @@ type Props = {
 };
 
 export default function ResponseShow({ survey, response }: Props) {
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: "Dashboard", href: routeOr("dashboard", undefined, "/dashboard") },
+    { title: "Survei", href: routeOr("surveys.index", undefined, "/surveys") },
+    { title: `Respon: ${survey.title}`, href: "#" },
+  ];
   return (
-    <AdminLayout>
-      <Head title={`Response — ${survey.title}`} />
-      <h1 className="text-xl font-semibold mb-4">Response Detail</h1>
-      <div className="bg-white rounded shadow p-4">
-        <div className="text-sm text-gray-600 mb-2">UUID: {response.response_uuid}</div>
-        <div className="text-sm text-gray-600 mb-4">Submitted: {response.submitted_at}</div>
-        <pre className="text-xs bg-gray-50 p-3 rounded overflow-auto">
+    <AdminLayout breadcrumbs={breadcrumbs}>
+      <Head title={`Respon - ${survey.title}`} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Detail Response</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="text-sm text-muted-foreground">UUID: {response.response_uuid}</div>
+          <div className="text-sm text-muted-foreground">Submitted: {response.submitted_at}</div>
+          <div className="rounded-lg bg-muted p-3">
+            <pre className="max-h-[60vh] overflow-auto text-xs leading-relaxed">
 {JSON.stringify(response.answers_json, null, 2)}
-        </pre>
-      </div>
+            </pre>
+          </div>
+        </CardContent>
+      </Card>
     </AdminLayout>
   );
 }

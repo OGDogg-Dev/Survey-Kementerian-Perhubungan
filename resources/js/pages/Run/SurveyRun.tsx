@@ -2,6 +2,8 @@ import { Head, router, usePage } from "@inertiajs/react";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import { routeOr } from "@/lib/route";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type PageProps = {
   survey: { id: number; title: string; slug: string; schema: unknown };
@@ -37,13 +39,21 @@ export default function SurveyRun() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="mx-auto max-w-3xl px-6 py-10">
       <Head title={survey.title} />
-      {flash?.ok && <div className="mb-4 rounded bg-green-100 p-3">{flash.ok}</div>}
-      <h1 className="text-3xl font-bold mb-6 text-center">{survey.title}</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <Survey model={model} onComplete={onComplete} />
-      </div>
+      {flash?.ok && (
+        <Alert className="mb-4">
+          <AlertDescription>{flash.ok}</AlertDescription>
+        </Alert>
+      )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-center text-xl">{survey.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Survey model={model} onComplete={onComplete} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

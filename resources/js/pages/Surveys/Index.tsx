@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SurveyCard } from "@/components/survey-card";
 import { routeOr } from "@/lib/route";
+import type { BreadcrumbItem } from "@/types";
 
 type SurveyRow = {
   id: number;
@@ -22,12 +23,16 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
   const filtered = surveys.filter((s) =>
     `${s.title} ${s.slug}`.toLowerCase().includes(query.toLowerCase())
   );
+  const breadcrumbs: BreadcrumbItem[] = [
+    { title: "Dashboard", href: routeOr("dashboard", undefined, "/dashboard") },
+    { title: "Survei", href: routeOr("surveys.index", undefined, "/surveys") },
+  ];
 
   return (
-    <AdminLayout>
-      <Head title="Surveys" />
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold">Surveys</h1>
+    <AdminLayout breadcrumbs={breadcrumbs}>
+      <Head title="Survei" />
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl font-semibold">Daftar Survei</h1>
         <div className="flex w-full gap-2 sm:w-auto">
           <Input
             value={query}

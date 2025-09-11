@@ -22,6 +22,11 @@ const mainNavItems: NavItem[] = [
         href: routeOr('dashboard', undefined, '/dashboard'),
         icon: LayoutGrid,
     },
+    {
+        title: 'Survei',
+        href: routeOr('surveys.index', undefined, '/surveys'),
+        icon: Folder,
+    },
 ];
 
 const rightNavItems: NavItem[] = [

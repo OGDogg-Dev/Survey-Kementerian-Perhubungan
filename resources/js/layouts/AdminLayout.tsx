@@ -1,24 +1,9 @@
-import { PropsWithChildren } from "react";
-import { Link, usePage } from "@inertiajs/react";
-import type { SharedData } from "@/types";
-import { routeOr } from "@/lib/route";
+import type { PropsWithChildren } from "react";
+import AppLayout from "@/layouts/app-layout";
+import type { BreadcrumbItem } from "@/types";
 
-export default function AdminLayout({ children }: PropsWithChildren) {
-  const { auth } = usePage<SharedData>().props;
-  const surveysIndex = routeOr("surveys.index", undefined, "/surveys");
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white">
-        <div className="max-w-6xl mx-auto p-4 flex items-center gap-4">
-          <Link href={surveysIndex} className="font-semibold">
-            Survey Admin
-          </Link>
-          <nav className="ml-auto flex items-center gap-3">
-            <span className="text-sm text-gray-600">{auth?.user?.name}</span>
-          </nav>
-        </div>
-      </header>
-      <main className="max-w-6xl mx-auto p-6">{children}</main>
-    </div>
-  );
+// AdminLayout now reuses the main App layout (header + sidebar)
+// so all admin pages get a consistent shell, theming, and responsive UX.
+export default function AdminLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
+  return <AppLayout breadcrumbs={breadcrumbs}>{children}</AppLayout>;
 }
