@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
 
 @plugin 'tailwindcss-animate';
 
@@ -59,98 +59,7 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
-:root {
-    /* New default theme: Ocean */
-    --background: oklch(0.99 0 0);
-    --foreground: oklch(0.2 0 0);
-
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.2 0 0);
-
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(17.304% 0.00002 271.152);
-
-    --primary: oklch(0.58 0.16 255);
-    --primary-foreground: oklch(0.99 0 0);
-
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(19.125% 0.00002 271.152);
-
-    --muted: oklch(0.96 0 0);
-    --muted-foreground: oklch(0.55 0 0);
-
-    --accent: oklch(0.75 0.2 320);
-    --accent-foreground: oklch(60.189% 0.24126 28.708);
-
-    --destructive: oklch(0.6 0.22 25);
-    --destructive-foreground: oklch(0.99 0 0);
-
-    --border: oklch(0.9 0 0);
-    --input: oklch(0.94 0 0);
-    --ring: oklch(0.8 0 0);
-
-    --chart-1: oklch(0.62 0.18 255);
-    --chart-2: oklch(0.74 0.2 320);
-    --chart-3: oklch(0.58 0.2 210);
-    --chart-4: oklch(0.7 0.2 120);
-    --chart-5: oklch(0.68 0.2 60);
-
-    --radius: 0.625rem;
-
-    --sidebar: oklch(0.99 0 0);
-    --sidebar-foreground: oklch(0.2 0 0);
-    --sidebar-primary: var(--primary);
-    --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--accent);
-    --sidebar-accent-foreground: var(--accent-foreground);
-    --sidebar-border: var(--border);
-    --sidebar-ring: var(--ring);
-}
-
-.dark {
-    --background: oklch(0.12 0 0);
-    --foreground: oklch(0.98 0 0);
-
-    --card: oklch(0.16 0 0);
-    --card-foreground: oklch(0.98 0 0);
-
-    --popover: oklch(0.16 0 0);
-    --popover-foreground: oklch(0.98 0 0);
-
-    --primary: oklch(0.72 0.18 255);
-    --primary-foreground: oklch(0.13 0 0);
-
-    --secondary: oklch(0.2 0 0);
-    --secondary-foreground: oklch(0.98 0 0);
-
-    --muted: oklch(0.22 0 0);
-    --muted-foreground: oklch(0.72 0 0);
-
-    --accent: oklch(0.74 0.2 320);
-    --accent-foreground: oklch(0.98 0 0);
-
-    --destructive: oklch(0.48 0.16 25);
-    --destructive-foreground: oklch(0.98 0 0);
-
-    --border: oklch(0.23 0 0);
-    --input: oklch(0.23 0 0);
-    --ring: oklch(0.4 0 0);
-
-    --chart-1: oklch(0.62 0.21 275);
-    --chart-2: oklch(0.74 0.2 320);
-    --chart-3: oklch(0.72 0.2 210);
-    --chart-4: oklch(0.68 0.2 130);
-    --chart-5: oklch(0.66 0.2 60);
-
-    --sidebar: oklch(0.15 0 0);
-    --sidebar-foreground: oklch(0.98 0 0);
-    --sidebar-primary: var(--primary);
-    --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--accent);
-    --sidebar-accent-foreground: var(--accent-foreground);
-    --sidebar-border: var(--border);
-    --sidebar-ring: var(--ring);
-}
+/* Tokens moved to resources/css/tokens.css */
 
 @layer base {
     * {
@@ -233,7 +142,7 @@
 }
 
 @layer components {
-    /* App Topbar – elegant glass with subtle gradient */
+    /* App Topbar â€“ elegant glass with subtle gradient */
     [data-app-topbar] {
         background: linear-gradient(
             180deg,
@@ -255,7 +164,7 @@
                     0 12px 28px color-mix(in oklch, var(--primary), transparent 90%);
     }
 
-    /* Accent Card – used widely across app (e.g., survey cards) */
+    /* Accent Card â€“ used widely across app (e.g., survey cards) */
     .card-accent {
         position: relative;
         overflow: hidden;
@@ -322,6 +231,15 @@
         background-size: 22px 22px;
         mask-image: radial-gradient(ellipse at center, black, transparent 78%);
         pointer-events: none;
+    }
+
+    /* Lighten survey cards on landing to match brighter backdrop */
+    .landing-wrap .card-accent {
+        background: color-mix(in oklch, var(--background), white 90%) !important;
+        border-color: color-mix(in oklch, var(--border), var(--foreground) 6%) !important;
+        color: var(--foreground);
+        backdrop-filter: blur(4px) saturate(130%);
+        -webkit-backdrop-filter: blur(4px) saturate(130%);
     }
 
     /* Landing hero gradient text */
@@ -437,6 +355,91 @@
         letter-spacing: -0.01em;
     }
     .survey-run-card .sd-description { opacity: .8; }
+    .survey-run-card .sd-question__description,
+    .survey-run-card .sd-html,
+    .survey-run-card .sd-item__label,
+    .survey-run-card .sd-label,
+    .survey-run-card .sd-boolean__label,
+    .survey-run-card .sd-matrix__cell-text,
+    .survey-run-card .sd-multipletext__item-title {
+        color: var(--foreground) !important;
+        opacity: .92;
+    }
+    /* Ensure all question titles/options use foreground color */
+    .survey-run-card .sd-question__title,
+    .survey-run-card .sd-question__title .sd-title__text,
+    .survey-run-card .sd-title__text,
+    .survey-run-card .sv-string-viewer,
+    .survey-run-card .sd-selectbase__item .sd-selectbase__label,
+    .survey-run-card .sd-selectbase__item .sd-item__text {
+        color: var(--foreground) !important;
+    }
+    /* Global escalation: ensure any plain label/text inside SurveyJS uses foreground */
+    .survey-run-card .sd-root-modern,
+    .survey-run-card .sd-body,
+    .survey-run-card .sd-element,
+    .survey-run-card .sd-element__title,
+    .survey-run-card .sd-element__header,
+    .survey-run-card label,
+    .survey-run-card .sv-action__content,
+    .survey-run-card .sv-string-editor,
+    .survey-run-card .sd-comment {
+        color: var(--foreground) !important;
+    }
+    /* Matrix / table headers and cells */
+    .survey-run-card .sd-table,
+    .survey-run-card .sd-table__cell,
+    .survey-run-card .sd-table__cell--header,
+    .survey-run-card .sd-matrix__header,
+    .survey-run-card .sd-matrix__cell,
+    .survey-run-card .sd-matrix__cell--header {
+        color: var(--foreground) !important;
+    }
+    /* Rating text */
+    .survey-run-card .sv-rating__item-text { color: var(--foreground) !important; }
+    /* Prevent low opacity on option texts */
+    .survey-run-card .sd-selectbase__item .sd-item__text { opacity: 1 !important; }
+    /* Checkbox/Radio specific fallbacks */
+    .survey-run-card .sd-checkbox__caption,
+    .survey-run-card .sd-radio__caption,
+    .survey-run-card .sd-checkbox__label,
+    .survey-run-card .sd-radio__label {
+        color: var(--foreground) !important;
+    }
+    /* Remove unintended opacity on titles/descriptions if any theme applies it */
+    .survey-run-card .sd-title,
+    .survey-run-card .sd-description,
+    .survey-run-card .sd-question__title { opacity: 1 !important; }
+
+    .survey-run-card a { color: var(--primary); }
+
+    /* Stronger override for checkbox/radio option texts (covers nested spans) */
+    .survey-run-card .sd-selectbase__item,
+    .survey-run-card .sd-selectbase__item *,
+    .survey-run-card .sd-checkbox,
+    .survey-run-card .sd-radio,
+    .survey-run-card .sd-checkbox *,
+    .survey-run-card .sd-radio * {
+        color: var(--foreground) !important;
+    }
+    /* Avoid opacity dim on disabled items making text invisible */
+    .survey-run-card .sd-item--disabled .sd-item__text { opacity: .7 !important; }
+
+
+    /* Strengthen SurveyJS color variables to avoid unexpected overrides */
+    .survey-run-card {
+        --sjs-general-forecolor: var(--foreground);
+        --sjs-general-forecolor-light: color-mix(in oklch, var(--foreground), transparent 35%);
+        --sjs-questionpanel-textcolor: var(--foreground);
+        --sjs-editorfont-color: var(--foreground);
+        --sjs-font-editorfont-color: var(--foreground);
+    }
+    .survey-run-card .sd-error {
+        color: var(--destructive-foreground) !important;
+        background-color: color-mix(in oklch, var(--destructive), white 90%) !important;
+        border: 1px solid color-mix(in oklch, var(--destructive), var(--foreground) 12%) !important;
+        border-radius: .5rem; padding: .25rem .5rem;
+    }
 
     /* Layout & question blocks */
     .survey-run-card .sd-page { display: grid; gap: 14px; }
@@ -503,6 +506,9 @@
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-size: 10px; line-height: 1;
     }
+
+    /* Respect safe-area inset for iOS */
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
     .survey-run-card .sd-input,
     .survey-run-card .sd-text,
     .survey-run-card input,
@@ -666,3 +672,5 @@ body.nprogress-busy [data-app-topbar] {
   transition: background-color .2s ease, backdrop-filter .2s ease;
   background-color: color-mix(in oklch, var(--background), white 8%);
 }
+
+

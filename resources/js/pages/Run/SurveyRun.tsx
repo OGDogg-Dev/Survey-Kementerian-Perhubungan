@@ -1,4 +1,4 @@
-import { Head, router, usePage } from "@inertiajs/react";
+﻿import { Head, router, usePage } from "@inertiajs/react";
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import { routeOr } from "@/lib/route";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, SendHorizonal, Snowflake } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -48,11 +48,14 @@ export default function SurveyRun() {
   const canPrev = pageNo > 0;
   const isLast = pageNo === pageCount - 1;
   const steps = Array.from({ length: Math.max(1, pageCount) }, (_, i) => i);
+  const surveyRef = useRef<HTMLDivElement | null>(null);
 
   // Smooth scroll to top on page change (respect reduced motion)
   useEffect(() => {
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    // Move focus to the survey region for assistive tech
+    surveyRef.current?.focus();
   }, [pageNo]);
 
   // Keyboard navigation
@@ -105,7 +108,7 @@ export default function SurveyRun() {
         </Alert>
       )}
       {/* Soft header with frost icon + chips */}
-      <div className="mb-4 flex items-center justify-between rounded-xl border bg-card/70 px-3 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+      <div className="mb-4 flex items-center justify-between rounded-xl border bg-card/70 px-3 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/50" data-app-topbar>
         <div className="flex items-center gap-2 text-sm text-muted-foreground" aria-live="polite">
           <Snowflake className="h-4 w-4 text-primary" />
           <span>Langkah</span>
@@ -120,7 +123,14 @@ export default function SurveyRun() {
               <span key={i} className={cn('step-dot', i <= pageNo && 'active')} />
             ))}
           </div>
-          <div className="sejuk-progress h-1.5 w-36 sm:w-44 md:w-56 overflow-hidden rounded-full">
+          <div
+            className="sejuk-progress h-1.5 w-36 sm:w-44 md:w-56 overflow-hidden rounded-full"
+            role="progressbar"
+            aria-label="Kemajuan survei"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div className="sejuk-progress-bar h-full" style={{ width: `${pct}%` }} />
           </div>
           <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
@@ -141,14 +151,16 @@ export default function SurveyRun() {
               exit={{ opacity: 0, x: -12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
             >
-              <Survey model={model} onComplete={onComplete} />
+              <div ref={surveyRef} tabIndex={-1} aria-label="Area formulir survei" className="outline-none focus-visible:ring-2 focus-visible:ring-ring/60 rounded">
+                <Survey model={model} onComplete={onComplete} />
+              </div>
             </motion.div>
           </AnimatePresence>
         </CardContent>
       </Card>
       {/* Sticky bottom bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex max-w-3xl items-center gap-2 px-3 py-2">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/85 text-foreground backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto flex max-w-3xl items-center gap-2 px-3 py-2 safe-bottom">
           <div className="relative h-8 w-8">
             <div
               className="absolute inset-0 rounded-full"
@@ -162,16 +174,16 @@ export default function SurveyRun() {
           </div>
           <div className="ml-1 text-xs text-muted-foreground">Langkah {pageNo + 1} / {pageCount}</div>
           <div className="ml-auto flex gap-2">
-            <Button variant="outline" onClick={() => model.prevPage()} disabled={!canPrev}>
-              <ChevronLeft className="mr-1 h-4 w-4" /> Kembali
+            <Button variant="outline" onClick={() => model.prevPage()} disabled={!canPrev} aria-label="Kembali ke halaman sebelumnya">
+              <ChevronLeft className="mr-1 h-4 w-4" aria-hidden /> Kembali
             </Button>
             {isLast ? (
-              <Button onClick={() => model.doComplete()}>
-                <SendHorizonal className="mr-1 h-4 w-4" /> Kirim
+              <Button onClick={() => model.doComplete()} aria-label="Kirim jawaban survei">
+                <SendHorizonal className="mr-1 h-4 w-4" aria-hidden /> Kirim
               </Button>
             ) : (
-              <Button onClick={() => model.nextPage()}>
-                Lanjut <ChevronRight className="ml-1 h-4 w-4" />
+              <Button onClick={() => model.nextPage()} aria-label="Lanjut ke halaman berikutnya">
+                Lanjut <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
               </Button>
             )}
           </div>
@@ -180,3 +192,4 @@ export default function SurveyRun() {
     </div>
   );
 }
+

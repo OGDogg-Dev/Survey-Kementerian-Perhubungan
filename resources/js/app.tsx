@@ -1,5 +1,6 @@
 // Load SurveyJS base styles first so our app.css can override them
 import 'survey-core/survey-core.css';
+import '../css/tokens.css';
 
 // Our app styles (Tailwind + custom overrides)
 import '../css/app.css';
