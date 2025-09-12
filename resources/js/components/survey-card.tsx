@@ -1,4 +1,4 @@
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,14 +46,25 @@ export function SurveyCard({ survey, showAnalytics = false }: SurveyCardProps) {
         <div>{survey.responses_count} respons</div>
       </CardContent>
       <CardFooter className="justify-end gap-2">
-        <Button asChild variant="outline" size="sm">
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            if (confirm(`Hapus survei \"${survey.title}\"? Tindakan ini tidak dapat dibatalkan.`)) {
+              router.delete(routeOr("surveys.destroy", survey.id, `/surveys/${survey.id}`));
+            }
+          }}
+        >
+          Hapus
+        </Button>
+        <Button asChild variant="outline" size="sm" className="text-foreground">
           <Link href={routeOr("surveys.edit", survey.id, `/surveys/${survey.id}/edit`)}>Ubah</Link>
         </Button>
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm" className="text-foreground">
           <Link href={routeOr("surveys.responses", survey.id, `/surveys/${survey.id}/responses`)}>Respon</Link>
         </Button>
         {showAnalytics && (
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="text-foreground">
             <Link href={routeOr("surveys.analytics", survey.id, `/surveys/${survey.id}/analytics`)}>Analitik</Link>
           </Button>
         )}

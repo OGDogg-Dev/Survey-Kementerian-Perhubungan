@@ -1,7 +1,8 @@
-import '../css/app.css';
-
-// SurveyJS CSS (disable source maps to avoid 404 errors)
+// Load SurveyJS base styles first so our app.css can override them
 import 'survey-core/survey-core.css';
+
+// Our app styles (Tailwind + custom overrides)
+import '../css/app.css';
 // creator CSS is loaded dynamically only on the editor page
 
 // Override source map URLs to prevent 404 errors

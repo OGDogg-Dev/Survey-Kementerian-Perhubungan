@@ -95,4 +95,9 @@ class SurveyController extends Controller
             fclose($out);
         }, 200, $headers);
     }
+
+    public function destroy(Survey $survey) {
+        $survey->delete();
+        return redirect()->route('surveys.index')->with('ok', 'Survei dihapus');
+    }
 }

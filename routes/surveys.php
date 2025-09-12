@@ -12,6 +12,7 @@ Route::middleware(['auth','verified','admin'])->group(function () {
     Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');
     Route::get('/surveys/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
     Route::put('/surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
+    Route::delete('/surveys/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
     Route::post('/surveys/{survey}/publish', [SurveyController::class, 'publish'])->name('surveys.publish');
     Route::get('/surveys/{survey}/responses', [SurveyController::class, 'responses'])->name('surveys.responses');
     Route::get('/surveys/{survey}/responses/{response}', [SurveyController::class, 'responseShow'])->name('surveys.responses.show');

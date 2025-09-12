@@ -5,8 +5,10 @@ import { routeOr } from "@/lib/route";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, SendHorizonal, Snowflake } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 type PageProps = {
   survey: { id: number; title: string; slug: string; schema: unknown };
@@ -45,6 +47,13 @@ export default function SurveyRun() {
   const pct = Math.round(((pageNo + 1) / Math.max(1, pageCount)) * 100);
   const canPrev = pageNo > 0;
   const isLast = pageNo === pageCount - 1;
+  const steps = Array.from({ length: Math.max(1, pageCount) }, (_, i) => i);
+
+  // Smooth scroll to top on page change (respect reduced motion)
+  useEffect(() => {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  }, [pageNo]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -95,14 +104,31 @@ export default function SurveyRun() {
           <AlertDescription>{flash.ok}</AlertDescription>
         </Alert>
       )}
-      {/* Header progress (Lime solid bar) */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">Langkah {pageNo + 1} / {pageCount}</div>
-        <div className="h-1.5 w-40 rounded-full bg-muted/60">
-          <div className="runner-progress h-full rounded-full" style={{ width: `${pct}%` }} />
+      {/* Soft header with frost icon + chips */}
+      <div className="mb-4 flex items-center justify-between rounded-xl border bg-card/70 px-3 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground" aria-live="polite">
+          <Snowflake className="h-4 w-4 text-primary" />
+          <span>Langkah</span>
+          <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
+            {pageNo + 1}
+            <span className="opacity-60">/ {pageCount}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-1">
+            {steps.map((i) => (
+              <span key={i} className={cn('step-dot', i <= pageNo && 'active')} />
+            ))}
+          </div>
+          <div className="sejuk-progress h-1.5 w-36 sm:w-44 md:w-56 overflow-hidden rounded-full">
+            <div className="sejuk-progress-bar h-full" style={{ width: `${pct}%` }} />
+          </div>
+          <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="kbd">Enter</span> untuk {isLast ? 'kirim' : 'lanjut'}
+          </div>
         </div>
       </div>
-      <Card>
+      <Card className="survey-run-card">
         <CardHeader>
           <CardTitle className="text-center text-xl">{survey.title}</CardTitle>
         </CardHeader>
@@ -121,13 +147,13 @@ export default function SurveyRun() {
         </CardContent>
       </Card>
       {/* Sticky bottom bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-3 py-2">
           <div className="relative h-8 w-8">
             <div
               className="absolute inset-0 rounded-full"
               style={{
-                background: `conic-gradient(hsl(var(--primary)) ${pct * 3.6}deg, hsl(var(--muted-foreground)/.2) 0)`,
+                background: `conic-gradient(var(--primary) ${pct * 3.6}deg, color-mix(in oklch, var(--muted-foreground), transparent 80%) 0)`,
               }}
             />
             <div className="absolute inset-1 grid place-items-center rounded-full bg-background text-[10px] font-medium">
@@ -137,12 +163,16 @@ export default function SurveyRun() {
           <div className="ml-1 text-xs text-muted-foreground">Langkah {pageNo + 1} / {pageCount}</div>
           <div className="ml-auto flex gap-2">
             <Button variant="outline" onClick={() => model.prevPage()} disabled={!canPrev}>
-              Kembali
+              <ChevronLeft className="mr-1 h-4 w-4" /> Kembali
             </Button>
             {isLast ? (
-              <Button onClick={() => model.doComplete()}>Kirim</Button>
+              <Button onClick={() => model.doComplete()}>
+                <SendHorizonal className="mr-1 h-4 w-4" /> Kirim
+              </Button>
             ) : (
-              <Button onClick={() => model.nextPage()}>Lanjut</Button>
+              <Button onClick={() => model.nextPage()}>
+                Lanjut <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
             )}
           </div>
         </div>

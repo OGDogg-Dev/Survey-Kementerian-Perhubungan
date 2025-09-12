@@ -200,6 +200,19 @@ export default function Edit({ survey }: { survey: SurveyDTO }) {
             <TooltipContent>Terbitkan versi terbaru</TooltipContent>
           </Tooltip>
         )}
+        {survey && (
+          <Button
+            variant="destructive"
+            onClick={() => {
+              if (confirm(`Hapus survei \"${survey.title}\"? Tindakan ini tidak dapat dibatalkan.`)) {
+                router.delete(routeOr("surveys.destroy", survey.id, `/surveys/${survey.id}`));
+              }
+            }}
+            aria-label="Hapus survei"
+          >
+            Hapus
+          </Button>
+        )}
       </div>
       <Card className="card-accent">
         <CardContent ref={editorRef} className="p-2">

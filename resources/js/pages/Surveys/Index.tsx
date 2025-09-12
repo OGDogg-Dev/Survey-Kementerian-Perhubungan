@@ -106,7 +106,7 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
               <SelectItem value="responses">Paling banyak respon</SelectItem>
             </SelectContent>
           </Select>
-          <Button asChild>
+          <Button asChild className="text-primary-foreground dark:text-primary-foreground">
             <Link href={routeOr("surveys.create", undefined, "/surveys/create")}>
               <Plus className="mr-1 size-4" /> Buat Survei
             </Link>
@@ -140,8 +140,8 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
           <div className="mb-2 text-2xl">🗂️</div>
           <p className="mb-3 text-sm text-muted-foreground">Belum ada survei yang cocok dengan filter.</p>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => { setQuery(""); setStatus("all"); setSort("latest"); }}>Reset filter</Button>
-            <Button asChild>
+            <Button variant="outline" className="text-foreground" onClick={() => { setQuery(""); setStatus("all"); setSort("latest"); }}>Reset filter</Button>
+            <Button asChild className="text-primary-foreground dark:text-primary-foreground">
               <Link href={routeOr("surveys.create", undefined, "/surveys/create")}><Plus className="mr-1 size-4" /> Buat survei pertama</Link>
             </Button>
           </div>

@@ -19,7 +19,7 @@ export default function Dashboard() {
           <Link href={surveysIndex}>Kelola Survei</Link>
         </Button>
       </div>
-      <Card>
+      <Card className="card-accent">
         <CardHeader>
           <CardTitle>Selamat datang di Dashboard Survei</CardTitle>
         </CardHeader>
