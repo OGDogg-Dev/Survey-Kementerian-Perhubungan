@@ -40,31 +40,65 @@ export default function Analytics({ survey, analytics }: Props) {
     const labels = Object.keys(data.counts);
     const values = Object.values(data.counts);
     return (
-      <Card key={key} className="mb-6 card-accent">
-        <CardHeader>
-          <CardTitle>{data.title ?? key}</CardTitle>
+      <Card key={key} className="mb-6 frost-card">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-slate-700">{data.title ?? key}</CardTitle>
         </CardHeader>
         <CardContent>
           {labels.length > 0 ? (
-            <Suspense fallback={<Skeleton className="h-40 w-full" />}>
-              <BarComponent
-                data={{
-                  labels,
-                  datasets: [
-                    {
-                      label: "Respon",
-                      data: values,
-                      backgroundColor: "rgba(59,130,246,0.6)",
+            <div className="relative h-60 md:h-72">
+              <Suspense fallback={<Skeleton className="h-full w-full" />}>
+                <BarComponent
+                  data={{
+                    labels,
+                    datasets: [
+                      {
+                        label: "Respon",
+                        data: values,
+                        backgroundColor: "rgba(59,163,244,0.65)",      // glacier  #3BA3F4
+                        borderColor: "#1D7FD1",                        // glacier-700
+                        borderWidth: 1.5,
+                        borderRadius: 8,
+                        maxBarThickness: 48
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: "rgba(15,23,42,0.9)",        // slate-900/90
+                        borderColor: "#1D7FD1",
+                        borderWidth: 1,
+                        titleColor: "#E2E8F0",
+                        bodyColor: "#E2E8F0",
+                        padding: 10,
+                      },
                     },
-                  ],
-                }}
-              />
-            </Suspense>
+                    scales: {
+                      x: {
+                        ticks: { color: "#64748b" },                   // slate-500
+                        grid:  { color: "rgba(148,163,184,0.25)" },    // slate-400/25
+                        border: { color: "rgba(148,163,184,0.35)" }
+                      },
+                      y: {
+                        beginAtZero: true,
+                        ticks: { color: "#64748b" },
+                        grid:  { color: "rgba(148,163,184,0.25)" },
+                        border: { color: "rgba(148,163,184,0.35)" }
+                      }
+                    }
+                  }}
+                />
+              </Suspense>
+            </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Tidak ada data.</p>
+            <p className="text-sm text-slate-500">Tidak ada data.</p>
           )}
           {data.average !== null && (
-            <p className="mt-3 text-sm text-muted-foreground">Rata-rata: {data.average.toFixed(2)}</p>
+            <p className="mt-3 text-sm text-slate-500">Rata-rata: {data.average.toFixed(2)}</p>
           )}
         </CardContent>
       </Card>
@@ -74,31 +108,31 @@ export default function Analytics({ survey, analytics }: Props) {
   return (
     <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title={`Analitik - ${survey.title}`} />
-      <h1 className="mb-6 text-xl font-semibold">Analitik - {survey.title}</h1>
-      <div className="mb-6 grid gap-3 sm:grid-cols-2">
-        <Card className="card-accent">
-          <CardHeader>
-            <CardTitle>Total Respon</CardTitle>
+      <h1 className="mb-6 text-2xl md:text-3xl font-semibold text-slate-700">Analitik — {survey.title}</h1>
+      <div className="mb-6 grid gap-4 sm:grid-cols-2">
+        <Card className="frost-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-slate-700">Total Respon</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold">{totalResponses}</div>
-            <p className="text-xs text-muted-foreground">Perkiraan total respon</p>
+            <div className="text-2xl font-semibold text-slate-700">{totalResponses}</div>
+            <p className="text-xs text-slate-500">Perkiraan total respon</p>
           </CardContent>
         </Card>
-        <Card className="card-accent">
-          <CardHeader>
-            <CardTitle>Completion Rate</CardTitle>
+        <Card className="frost-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-slate-700">Completion Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold">{completionRate}%</div>
-            <p className="text-xs text-muted-foreground">Perkiraan (min/total)</p>
+            <div className="text-2xl font-semibold text-slate-700">{completionRate}%</div>
+            <p className="text-xs text-slate-500">Perkiraan (min/total)</p>
           </CardContent>
         </Card>
       </div>
       {charts.length > 0 ? charts : (
-        <Card className="card-accent">
+        <Card className="frost-card">
           <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">Belum ada data analitik.</p>
+            <p className="text-sm text-slate-500">Belum ada data analitik.</p>
           </CardContent>
         </Card>
       )}

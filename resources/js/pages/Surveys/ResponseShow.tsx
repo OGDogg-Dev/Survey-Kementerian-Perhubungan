@@ -18,15 +18,15 @@ export default function ResponseShow({ survey, response }: Props) {
   return (
     <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title={`Respon - ${survey.title}`} />
-      <Card className="card-accent">
-        <CardHeader>
-          <CardTitle>Detail Response</CardTitle>
+      <Card className="frost-card">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-slate-700">Detail Respon</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="text-sm text-muted-foreground">UUID: {response.response_uuid}</div>
-          <div className="text-sm text-muted-foreground">Submitted: {response.submitted_at}</div>
-          <div className="rounded-lg bg-muted p-3">
-            <pre className="max-h-[60vh] overflow-auto text-xs leading-relaxed">
+          <div className="text-sm text-slate-500">UUID: {response.response_uuid}</div>
+          <div className="text-sm text-slate-500">Submitted: {response.submitted_at}</div>
+          <div className="rounded-xl border border-white/60 bg-white/70 backdrop-blur p-3 dark:bg-slate-900/70 dark:border-slate-700/50">
+            <pre className="max-h-[60vh] overflow-auto text-xs leading-relaxed text-slate-700 dark:text-slate-200">
 {JSON.stringify(response.answers_json, null, 2)}
             </pre>
           </div>

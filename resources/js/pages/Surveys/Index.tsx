@@ -11,6 +11,7 @@ import { Plus, Search } from "lucide-react";
 import { usePageLoading } from "@/hooks/use-page-loading";
 import { SurveysIndexSkeleton } from "@/components/skeletons/surveys-index-skeleton";
 import { AnimatePresence, motion } from "framer-motion";
+import FrostCard from "@/components/FrostCard";
 
 type SurveyRow = {
   id: number;
@@ -73,46 +74,69 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
     { title: "Survei", href: routeOr("surveys.index", undefined, "/surveys") },
   ];
   const isLoading = usePageLoading();
+  const total = surveys.length;
+  const publishedCount = useMemo(() => surveys.filter((s) => s.status === 'published').length, [surveys]);
+  const responsesTotal = useMemo(() => surveys.reduce((acc, s) => acc + s.responses_count, 0), [surveys]);
 
   return (
     <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title="Survei" />
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold">Daftar Survei</h1>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <div className="relative w-full sm:w-72">
-            <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 opacity-60" />
-            <Input
-              ref={searchRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tekan / untuk mencari..."
-              className="pl-8"
-            />
+      <div className="min-h-screen bg-[var(--color-snow,#F8FAFC)] -mx-4 sm:mx-0 p-4 sm:p-6 sm:rounded-xl">
+        <div className="mx-auto max-w-6xl">
+          <h1 className="text-xl font-semibold mb-4">Daftar Survei</h1>
+
+          {/* Metrics */}
+          <div className="grid gap-4 md:grid-cols-3 mb-4">
+            <FrostCard>
+              <h3 className="text-slate-600">Total Survei</h3>
+              <div className="text-2xl font-semibold">{total}</div>
+            </FrostCard>
+            <FrostCard>
+              <h3 className="text-slate-600">Terbit</h3>
+              <div className="text-2xl font-semibold">{publishedCount}</div>
+            </FrostCard>
+            <FrostCard>
+              <h3 className="text-slate-600">Total Respon</h3>
+              <div className="text-2xl font-semibold">{responsesTotal}</div>
+            </FrostCard>
           </div>
-          <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-            <SelectTrigger className="sm:w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Terbit</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger className="sm:w-[180px]"><SelectValue placeholder="Urutkan" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="latest">Terbaru</SelectItem>
-              <SelectItem value="title">Judul (A-Z)</SelectItem>
-              <SelectItem value="responses">Paling banyak respon</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button asChild className="text-primary-foreground dark:text-primary-foreground">
-            <Link href={routeOr("surveys.create", undefined, "/surveys/create")}>
-              <Plus className="mr-1 size-4" /> Buat Survei
-            </Link>
-          </Button>
-        </div>
-      </div>
+
+          {/* Filters */}
+          <FrostCard className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:w-80">
+              <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 opacity-60" />
+              <Input
+                ref={searchRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Tekan / untuk mencari..."
+                className="pl-8"
+              />
+            </div>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                <SelectTrigger className="sm:w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Terbit</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+                <SelectTrigger className="sm:w-[180px]"><SelectValue placeholder="Urutkan" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="latest">Terbaru</SelectItem>
+                  <SelectItem value="title">Judul (A-Z)</SelectItem>
+                  <SelectItem value="responses">Paling banyak respon</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button asChild className="text-primary-foreground dark:text-primary-foreground">
+                <Link href={routeOr("surveys.create", undefined, "/surveys/create")}>
+                  <Plus className="mr-1 size-4" /> Buat Survei
+                </Link>
+              </Button>
+            </div>
+          </FrostCard>
       {isLoading ? (
         <SurveysIndexSkeleton />
       ) : filtered.length > 0 ? (
@@ -136,17 +160,22 @@ export default function Index({ surveys }: { surveys: SurveyRow[] }) {
           </div>
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-10 text-center">
-          <div className="mb-2 text-2xl">🗂️</div>
+        <FrostCard className="text-center p-10">
           <p className="mb-3 text-sm text-muted-foreground">Belum ada survei yang cocok dengan filter.</p>
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2">
             <Button variant="outline" className="text-foreground" onClick={() => { setQuery(""); setStatus("all"); setSort("latest"); }}>Reset filter</Button>
             <Button asChild className="text-primary-foreground dark:text-primary-foreground">
               <Link href={routeOr("surveys.create", undefined, "/surveys/create")}><Plus className="mr-1 size-4" /> Buat survei pertama</Link>
             </Button>
           </div>
-        </div>
+        </FrostCard>
       )}
+        </div>
+      </div>
     </AdminLayout>
   );
 }
+
+
+
+

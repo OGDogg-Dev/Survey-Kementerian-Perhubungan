@@ -8,669 +8,337 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans:
+    'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --radius-lg: var(--radius);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-sm: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 
-    --color-destructive: var(--destructive);
-    --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Frost additions */
+  --color-glacier: #3BA3F4;
+  --color-glacier-700: #1D7FD1;
+  --color-frost: #5EEAD4;
+  --color-snow: #F8FAFC;
 }
 
 /* Tokens moved to resources/css/tokens.css */
 
 @layer base {
-    * {
-        @apply border-border;
-    }
+  /*
+    ✅ Core fix untuk "layar bergeser":
+    - Pakai scrollbar-gutter di html (modern)
+    - Fallback: paksa track scrollbar selalu ada di html (legacy)
+    - Hapus pendekatan padding-right berbasis --sbw (cenderung 0 saat lock)
+  */
+  @supports (scrollbar-gutter: stable) {
+    html { scrollbar-gutter: stable both-edges; }
+  }
+  @supports not (scrollbar-gutter: stable) {
+    html { overflow-y: scroll; }
+  }
 
-    body {
-        @apply bg-background text-foreground;
-    }
+  /* Hindari scroll horizontal tak sengaja ketika track berganti */
+  *, *::before, *::after { box-sizing: border-box; }
+  body { overflow-x: clip; }
+
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
 }
 
-@keyframes gradient {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
+@keyframes gradient { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
 @layer utilities {
-    /* Landing-like background surface applied globally */
-    .surface-landing {
-        /* Override tokens to dark, matching landing look */
-        --background: oklch(78.645% 0.08235 271.34);
-        --foreground: oklch(0.985 0 0);
-        --card: oklch(0.145 0 0);
-        --card-foreground: oklch(0.985 0 0);
-        --popover: oklch(0.145 0 0);
-        --popover-foreground: oklch(0.985 0 0);
-        --primary: oklch(0.73 0.22 320);
-        --primary-foreground: oklch(0.145 0 0);
-        --secondary: oklch(0.269 0 0);
-        --secondary-foreground: oklch(0.985 0 0);
-        --muted: oklch(0.269 0 0);
-        --muted-foreground: oklch(0.708 0 0);
-        --destructive: oklch(0.396 0.141 25.723);
-        --destructive-foreground: oklch(0.985 0 0);
-        --border: oklch(0.269 0 0);
-        --input: oklch(0.269 0 0);
-        --ring: oklch(0.439 0 0);
-        --sidebar: var(--background);
-        --sidebar-foreground: var(--foreground);
-        --sidebar-primary: var(--primary);
-        --sidebar-primary-foreground: var(--primary-foreground);
-        --sidebar-accent: var(--secondary);
-        --sidebar-accent-foreground: var(--secondary-foreground);
-        --sidebar-border: var(--border);
-        --sidebar-ring: var(--ring);
+  /* Frost ease + shadow */
+  .ease-frost { transition-timing-function: cubic-bezier(.2,.8,.2,1); }
+  .shadow-frost { box-shadow: 0 10px 30px rgba(59,163,244,0.15); }
 
-        background-color: var(--background);
-        background-image:
-            radial-gradient(1000px 600px at 10% 10%, color-mix(in oklch, oklch(0.65 0.2 325), transparent 82%), transparent 60%),
-            radial-gradient(800px 400px at 90% 20%, color-mix(in oklch, oklch(0.6 0.1 255), transparent 84%), transparent 60%),
-            linear-gradient(135deg, color-mix(in oklch, var(--background), black 6%), color-mix(in oklch, var(--background), black 8%));
-        background-attachment: fixed;
-        color: var(--foreground);
-    }
+  /* Frost glass card */
+  .frost-card { background: rgba(255,255,255,0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 10px 30px rgba(59,163,244,0.15); border-radius: 1.25rem; }
 
-    .glass {
-        @apply bg-white/10 backdrop-blur border border-white/20;
-    }
+  /* Accessible focus outline helper */
+  .focus-ring:focus,
+  .focus-ring:focus-visible { outline:2px solid #3BA3F4; outline-offset:2px; }
 
-    .animate-gradient {
-        background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
-    }
+  /* Landing-like background surface applied globally */
+  .surface-landing {
+    --background: oklch(78.645% 0.08235 271.34);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.145 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.145 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.73 0.22 320);
+    --primary-foreground: oklch(0.145 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --destructive: oklch(0.396 0.141 25.723);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(0.269 0 0);
+    --input: oklch(0.269 0 0);
+    --ring: oklch(0.439 0 0);
+    --sidebar: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--secondary);
+    --sidebar-accent-foreground: var(--secondary-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
 
-    .neon-hover {
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
+    background-color: var(--background);
+    background-image:
+      radial-gradient(1000px 600px at 10% 10%, color-mix(in oklch, oklch(0.65 0.2 325), transparent 82%), transparent 60%),
+      radial-gradient(800px 400px at 90% 20%, color-mix(in oklch, oklch(0.6 0.1 255), transparent 84%), transparent 60%),
+      linear-gradient(135deg, color-mix(in oklch, var(--background), black 6%), color-mix(in oklch, var(--background), black 8%));
+    background-attachment: fixed;
+    color: var(--foreground);
+  }
 
-    .neon-hover:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(147, 51, 234, 0.6), 0 0 30px rgba(147, 51, 234, 0.4);
-    }
+  .glass { @apply bg-white/10 backdrop-blur border border-white/20; }
+
+  .dark .frost-card{ background: rgba(15,23,42,0.65); border-color: rgba(148,163,184,0.2); }
+  .dark .focus-ring:focus,
+  .dark .focus-ring:focus-visible{ outline-color:#3BA3F4; }
+
+  .animate-gradient { background-size: 400% 400%; animation: gradient 15s ease infinite; }
+
+  .neon-hover { transition: transform 0.3s, box-shadow 0.3s; }
+  .neon-hover:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(147, 51, 234, 0.6), 0 0 30px rgba(147, 51, 234, 0.4); }
+
+  .scrollbar-stable { scrollbar-gutter: stable both-edges; }
+
+  [data-radix-popper-content-wrapper],
+  [role="menu"],
+  .dropdown-content { contain: layout paint; will-change: transform, opacity; transform: translateZ(0); }
 }
 
 @layer components {
-    /* App Topbar â€“ elegant glass with subtle gradient */
-    [data-app-topbar] {
-        background: linear-gradient(
-            180deg,
-            color-mix(in oklch, var(--background), white 8%),
-            color-mix(in oklch, var(--background), black 4%)
-        );
-        backdrop-filter: blur(12px) saturate(140%);
-        -webkit-backdrop-filter: blur(12px) saturate(140%);
-        box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset,
-                    0 10px 24px color-mix(in oklch, var(--primary), transparent 92%);
-    }
-    .dark [data-app-topbar] {
-        background: linear-gradient(
-            180deg,
-            color-mix(in oklch, var(--background), white 6%),
-            color-mix(in oklch, var(--background), black 2%)
-        );
-        box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 90%) inset,
-                    0 12px 28px color-mix(in oklch, var(--primary), transparent 90%);
-    }
+  [data-app-topbar] {
+    background: linear-gradient(180deg, color-mix(in oklch, var(--background), white 8%), color-mix(in oklch, var(--background), black 4%));
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset, 0 10px 24px color-mix(in oklch, var(--primary), transparent 92%);
+  }
+  .dark [data-app-topbar] {
+    background: linear-gradient(180deg, color-mix(in oklch, var(--background), white 6%), color-mix(in oklch, var(--background), black 2%));
+    box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 90%) inset, 0 12px 28px color-mix(in oklch, var(--primary), transparent 90%);
+  }
 
-    /* Accent Card â€“ used widely across app (e.g., survey cards) */
-    .card-accent {
-        position: relative;
-        overflow: hidden;
-        border-radius: 16px;
-        border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 6%);
-        background: color-mix(in oklch, var(--card), white 4%);
-        box-shadow: 0 2px 10px color-mix(in oklch, var(--primary), transparent 92%),
-                    0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset;
-        transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
-    }
-    .card-accent:hover { transform: translateY(-2px); box-shadow:
-        0 8px 26px color-mix(in oklch, var(--primary), transparent 88%),
-        0 2px 0 color-mix(in oklch, var(--foreground), transparent 90%) inset; }
-    .card-accent::before {
-        content: "";
-        position: absolute; inset: 0 0 auto 0; height: 3px;
-        background: linear-gradient(90deg,
-            color-mix(in oklch, var(--primary), white 6%),
-            color-mix(in oklch, var(--accent), white 6%)
-        );
-        opacity: .9;
-    }
-    .card-accent .card-muted { color: color-mix(in oklch, var(--foreground), transparent 40%); }
+  .card-accent { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 6%); background: color-mix(in oklch, var(--card), white 4%); box-shadow: 0 2px 10px color-mix(in oklch, var(--primary), transparent 92%), 0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+  .card-accent:hover { transform: translateY(-2px); box-shadow: 0 8px 26px color-mix(in oklch, var(--primary), transparent 88%), 0 2px 0 color-mix(in oklch, var(--foreground), transparent 90%) inset; }
+  .card-accent::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, color-mix(in oklch, var(--primary), white 6%), color-mix(in oklch, var(--accent), white 6%)); opacity: .9; }
+  .card-accent .card-muted { color: color-mix(in oklch, var(--foreground), transparent 40%); }
 
-    /* Better default headings scale */
-    .heading-hero { font-size: clamp(1.75rem, 2vw + 1rem, 2.25rem); font-weight: 700; letter-spacing: -0.02em; }
-    .heading-1    { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; }
-    .heading-2    { font-size: 1.25rem; font-weight: 600; }
-    .muted        { color: color-mix(in oklch, var(--foreground), transparent 40%); }
+  .heading-hero { font-size: clamp(1.75rem, 2vw + 1rem, 2.25rem); font-weight: 700; letter-spacing: -0.02em; }
+  .heading-1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; }
+  .heading-2 { font-size: 1.25rem; font-weight: 600; }
+  .muted { color: color-mix(in oklch, var(--foreground), transparent 40%); }
 
-    /* Primary badge */
-    .badge-published { background: color-mix(in oklch, var(--primary), white 10%); color: var(--primary-foreground); }
-    .badge-draft     { background: color-mix(in oklch, var(--muted), black 6%); color: var(--foreground); }
+  .badge-published { background: color-mix(in oklch, var(--primary), white 10%); color: var(--primary-foreground); }
+  .badge-draft { background: color-mix(in oklch, var(--muted), black 6%); color: var(--foreground); }
 
-    /* Elevation utilities */
-    .elev-1 { box-shadow: 0 2px 10px color-mix(in oklch, black, transparent 94%); }
-    .elev-2 { box-shadow: 0 8px 28px color-mix(in oklch, black, transparent 90%); }
-    .elev-3 { box-shadow: 0 16px 42px color-mix(in oklch, black, transparent 86%); }
+  .elev-1 { box-shadow: 0 2px 10px color-mix(in oklch, black, transparent 94%); }
+  .elev-2 { box-shadow: 0 8px 28px color-mix(in oklch, black, transparent 90%); }
+  .elev-3 { box-shadow: 0 16px 42px color-mix(in oklch, black, transparent 86%); }
 
-    /* Landing page theme wrapper (darkish glass with brand accents) */
-    .landing-wrap {
-        position: relative;
-        color: var(--foreground);
-        /* Brighter Ocean backdrop for landing */
-        --background: color-mix(in oklch, var(--background), white 6%);
-        --foreground: oklch(0.2 0 0);
-        --border: color-mix(in oklch, var(--border), var(--foreground) 8%);
-    }
-    .landing-wrap::before {
-        content: "";
-        position: fixed; inset: 0; z-index: -2;
-        background-image:
-          radial-gradient(1100px 640px at 12% 8%, color-mix(in oklch, var(--accent), transparent 92%), transparent 60%),
-          radial-gradient(900px 460px at 88% 12%, color-mix(in oklch, var(--primary), transparent 90%), transparent 60%),
-          linear-gradient(135deg, color-mix(in oklch, var(--background), white 4%), color-mix(in oklch, var(--background), white 6%));
-        background-attachment: fixed;
-    }
-    .landing-wrap::after {
-        content: "";
-        position: fixed; inset: 0; z-index: -1;
-        background-image:
-          linear-gradient(to right, rgba(0,0,0,.04) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(0,0,0,.04) 1px, transparent 1px);
-        background-size: 22px 22px;
-        mask-image: radial-gradient(ellipse at center, black, transparent 78%);
-        pointer-events: none;
-    }
+  .landing-wrap { position: relative; color: var(--foreground); --background: color-mix(in oklch, var(--background), white 6%); --foreground: oklch(0.2 0 0); --border: color-mix(in oklch, var(--border), var(--foreground) 8%); }
+  .landing-wrap::before { content:""; position: fixed; inset: 0; z-index: -2; background-image: radial-gradient(1100px 640px at 12% 8%, color-mix(in oklch, var(--accent), transparent 92%), transparent 60%), radial-gradient(900px 460px at 88% 12%, color-mix(in oklch, var(--primary), transparent 90%), transparent 60%), linear-gradient(135deg, color-mix(in oklch, var(--background), white 4%), color-mix(in oklch, var(--background), white 6%)); background-attachment: fixed; }
+  .landing-wrap::after { content:""; position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(to right, rgba(0,0,0,.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.04) 1px, transparent 1px); background-size: 22px 22px; mask-image: radial-gradient(ellipse at center, black, transparent 78%); pointer-events: none; }
 
-    /* Lighten survey cards on landing to match brighter backdrop */
-    .landing-wrap .card-accent {
-        background: color-mix(in oklch, var(--background), white 90%) !important;
-        border-color: color-mix(in oklch, var(--border), var(--foreground) 6%) !important;
-        color: var(--foreground);
-        backdrop-filter: blur(4px) saturate(130%);
-        -webkit-backdrop-filter: blur(4px) saturate(130%);
-    }
+  .landing-wrap .card-accent { background: color-mix(in oklch, var(--background), white 90%) !important; border-color: color-mix(in oklch, var(--border), var(--foreground) 6%) !important; color: var(--foreground); backdrop-filter: blur(4px) saturate(130%); -webkit-backdrop-filter: blur(4px) saturate(130%); }
 
-    /* Landing hero gradient text */
-    .landing-hero-accent {
-        background-image: linear-gradient(90deg,
-            color-mix(in oklch, var(--primary), white 10%),
-            color-mix(in oklch, var(--accent), white 10%)
-        );
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-    }
+  .landing-hero-accent { background-image: linear-gradient(90deg, color-mix(in oklch, var(--primary), white 10%), color-mix(in oklch, var(--accent), white 10%)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-    /* Landing search glass wrapper */
-    .landing-search {
-        border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 8%);
-        background-color: color-mix(in oklch, var(--background), white 8%);
-        border-radius: 12px;
-        padding: 2px;
-        transition: box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
-        backdrop-filter: blur(6px) saturate(130%);
-        -webkit-backdrop-filter: blur(6px) saturate(130%);
-    }
-    .landing-search:focus-within {
-        box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary), transparent 85%);
-        border-color: color-mix(in oklch, var(--primary), white 15%);
-        background-color: color-mix(in oklch, var(--background), white 10%);
-    }
-    /* SurveyRunner specific tweaks */
-    .runner-progress {
-        background-color: var(--primary);
-    }
+  .landing-search { border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 8%); background-color: color-mix(in oklch, var(--background), white 8%); border-radius: 12px; padding: 2px; transition: box-shadow .2s ease, border-color .2s ease, background-color .2s ease; backdrop-filter: blur(6px) saturate(130%); -webkit-backdrop-filter: blur(6px) saturate(130%); }
+  .landing-search:focus-within { box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary), transparent 85%); border-color: color-mix(in oklch, var(--primary), white 15%); background-color: color-mix(in oklch, var(--background), white 10%); }
 
-    /* Make SurveyJS form readable inside our Card */
-    .survey-run-card {
-        position: relative;
-        overflow: hidden;
-        border-radius: 16px;
-        /* Gradient border + glass body */
-        border: 1px solid transparent;
-        background:
-            linear-gradient(135deg,
-                color-mix(in oklch, var(--primary), transparent 85%),
-                color-mix(in oklch, var(--accent), transparent 85%)
-            ) border-box,
-            color-mix(in oklch, var(--background), white 6%) padding-box !important;
-        color: var(--foreground) !important;
-        backdrop-filter: blur(14px) saturate(150%);
-        -webkit-backdrop-filter: blur(14px) saturate(150%);
-        box-shadow:
-            0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset,
-            0 8px 28px color-mix(in oklch, var(--primary), transparent 90%),
-            0 2px 8px color-mix(in oklch, black, transparent 94%);
-        transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+  .runner-progress { background-color: var(--primary); }
 
-        /* SurveyJS theme variable overrides for better contrast */
-        --sjs-general-forecolor: var(--foreground);
-        --sjs-general-forecolor-light: color-mix(in oklch, var(--foreground), transparent 40%);
-        --sjs-primary-backcolor: var(--primary);
-        --sjs-primary-forecolor: var(--primary-foreground);
-        --sjs-border-default: var(--border);
-        --sjs-questionpanel-backcolor: color-mix(in oklch, var(--background), white 16%);
-        --sjs-questionpanel-hovercolor: color-mix(in oklch, var(--background), white 22%);
-        --sjs-editorpanel-backcolor: color-mix(in oklch, var(--background), white 18%);
-        --sjs-general-backcolor: color-mix(in oklch, var(--background), white 12%);
-    }
+  .survey-run-card {
+    position: relative; overflow: hidden; border-radius: 16px; border: 1px solid transparent;
+    background: linear-gradient(135deg, color-mix(in oklch, var(--primary), transparent 85%), color-mix(in oklch, var(--accent), transparent 85%)) border-box,
+                color-mix(in oklch, var(--background), white 6%) padding-box !important;
+    color: var(--foreground) !important; backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+    box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset, 0 8px 28px color-mix(in oklch, var(--primary), transparent 90%), 0 2px 8px color-mix(in oklch, black, transparent 94%);
+    transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+    --sjs-general-forecolor: var(--foreground);
+    --sjs-general-forecolor-light: color-mix(in oklch, var(--foreground), transparent 40%);
+    --sjs-primary-backcolor: var(--primary);
+    --sjs-primary-forecolor: var(--primary-foreground);
+    --sjs-border-default: var(--border);
+    --sjs-questionpanel-backcolor: color-mix(in oklch, var(--background), white 16%);
+    --sjs-questionpanel-hovercolor: color-mix(in oklch, var(--background), white 22%);
+    --sjs-editorpanel-backcolor: color-mix(in oklch, var(--background), white 18%);
+    --sjs-general-backcolor: color-mix(in oklch, var(--background), white 12%);
+  }
+  html.dark .survey-run-card { --sjs-questionpanel-backcolor: color-mix(in oklch, var(--background), white 10%); --sjs-questionpanel-hovercolor: color-mix(in oklch, var(--background), white 16%); --sjs-editorpanel-backcolor: color-mix(in oklch, var(--background), white 12%); --sjs-general-backcolor: color-mix(in oklch, var(--background), white 8%); }
+  .survey-run-card:hover { transform: translateY(-1.5px); box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset, 0 12px 36px color-mix(in oklch, var(--primary), transparent 88%), 0 3px 10px color-mix(in oklch, black, transparent 92%); }
+  .survey-run-card::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: conic-gradient(from 210deg at 20% 20%, rgba(255,255,255,.07) 0 8deg, transparent 8deg 360deg), conic-gradient(from 330deg at 80% 25%, rgba(255,255,255,.06) 0 6deg, transparent 6deg 360deg), conic-gradient(from 120deg at 40% 60%, rgba(255,255,255,.05) 0 10deg, transparent 10deg 360deg); opacity: .18; mask-image: radial-gradient(closest-side, black 58%, transparent); }
+  .survey-run-card::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(600px 140px at 10% -10%, rgba(255,255,255,.14), transparent 60%), radial-gradient(600px 140px at 90% -10%, rgba(255,255,255,.12), transparent 60%); opacity: .28; }
 
-    html.dark .survey-run-card {
-        --sjs-questionpanel-backcolor: color-mix(in oklch, var(--background), white 10%);
-        --sjs-questionpanel-hovercolor: color-mix(in oklch, var(--background), white 16%);
-        --sjs-editorpanel-backcolor: color-mix(in oklch, var(--background), white 12%);
-        --sjs-general-backcolor: color-mix(in oklch, var(--background), white 8%);
-    }
-    .survey-run-card:hover { transform: translateY(-1.5px); box-shadow:
-            0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%) inset,
-            0 12px 36px color-mix(in oklch, var(--primary), transparent 88%),
-            0 3px 10px color-mix(in oklch, black, transparent 92%);
-    }
-    /* Subtle cracked-glass effect overlay (non-intrusive) */
-    .survey-run-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background-image:
-            conic-gradient(from 210deg at 20% 20%, rgba(255,255,255,.07) 0 8deg, transparent 8deg 360deg),
-            conic-gradient(from 330deg at 80% 25%, rgba(255,255,255,.06) 0 6deg, transparent 6deg 360deg),
-            conic-gradient(from 120deg at 40% 60%, rgba(255,255,255,.05) 0 10deg, transparent 10deg 360deg);
-        opacity: .18;
-        mask-image: radial-gradient(closest-side, black 58%, transparent);
-    }
-    /* Light sheen */
-    .survey-run-card::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background:
-          radial-gradient(600px 140px at 10% -10%, rgba(255,255,255,.14), transparent 60%),
-          radial-gradient(600px 140px at 90% -10%, rgba(255,255,255,.12), transparent 60%);
-        opacity: .28;
-    }
-    .survey-run-card .sd-root-modern,
-    .survey-run-card .sd-title,
-    .survey-run-card .sd-description,
-    .survey-run-card .sd-question__title,
-    .survey-run-card .sd-item__text,
-    .survey-run-card .sv-string-editor {
-        color: var(--foreground) !important;
-    }
-    .survey-run-card .sd-title .sd-header__text h3 {
-        font-weight: 600;
-        letter-spacing: -0.01em;
-    }
-    .survey-run-card .sd-description { opacity: .8; }
-    .survey-run-card .sd-question__description,
-    .survey-run-card .sd-html,
-    .survey-run-card .sd-item__label,
-    .survey-run-card .sd-label,
-    .survey-run-card .sd-boolean__label,
-    .survey-run-card .sd-matrix__cell-text,
-    .survey-run-card .sd-multipletext__item-title {
-        color: var(--foreground) !important;
-        opacity: .92;
-    }
-    /* Ensure all question titles/options use foreground color */
-    .survey-run-card .sd-question__title,
-    .survey-run-card .sd-question__title .sd-title__text,
-    .survey-run-card .sd-title__text,
-    .survey-run-card .sv-string-viewer,
-    .survey-run-card .sd-selectbase__item .sd-selectbase__label,
-    .survey-run-card .sd-selectbase__item .sd-item__text {
-        color: var(--foreground) !important;
-    }
-    /* Global escalation: ensure any plain label/text inside SurveyJS uses foreground */
-    .survey-run-card .sd-root-modern,
-    .survey-run-card .sd-body,
-    .survey-run-card .sd-element,
-    .survey-run-card .sd-element__title,
-    .survey-run-card .sd-element__header,
-    .survey-run-card label,
-    .survey-run-card .sv-action__content,
-    .survey-run-card .sv-string-editor,
-    .survey-run-card .sd-comment {
-        color: var(--foreground) !important;
-    }
-    /* Matrix / table headers and cells */
-    .survey-run-card .sd-table,
-    .survey-run-card .sd-table__cell,
-    .survey-run-card .sd-table__cell--header,
-    .survey-run-card .sd-matrix__header,
-    .survey-run-card .sd-matrix__cell,
-    .survey-run-card .sd-matrix__cell--header {
-        color: var(--foreground) !important;
-    }
-    /* Rating text */
-    .survey-run-card .sv-rating__item-text { color: var(--foreground) !important; }
-    /* Prevent low opacity on option texts */
-    .survey-run-card .sd-selectbase__item .sd-item__text { opacity: 1 !important; }
-    /* Checkbox/Radio specific fallbacks */
-    .survey-run-card .sd-checkbox__caption,
-    .survey-run-card .sd-radio__caption,
-    .survey-run-card .sd-checkbox__label,
-    .survey-run-card .sd-radio__label {
-        color: var(--foreground) !important;
-    }
-    /* Remove unintended opacity on titles/descriptions if any theme applies it */
-    .survey-run-card .sd-title,
-    .survey-run-card .sd-description,
-    .survey-run-card .sd-question__title { opacity: 1 !important; }
+  .survey-run-card .sd-root-modern,
+  .survey-run-card .sd-title,
+  .survey-run-card .sd-description,
+  .survey-run-card .sd-question__title,
+  .survey-run-card .sd-item__text,
+  .survey-run-card .sv-string-editor { color: var(--foreground) !important; }
+  .survey-run-card .sd-title .sd-header__text h3 { font-weight: 600; letter-spacing: -0.01em; }
+  .survey-run-card .sd-description { opacity: .8; }
+  .survey-run-card .sd-question__description,
+  .survey-run-card .sd-html,
+  .survey-run-card .sd-item__label,
+  .survey-run-card .sd-label,
+  .survey-run-card .sd-boolean__label,
+  .survey-run-card .sd-matrix__cell-text,
+  .survey-run-card .sd-multipletext__item-title { color: var(--foreground) !important; opacity: .92; }
+  .survey-run-card .sd-question__title,
+  .survey-run-card .sd-question__title .sd-title__text,
+  .survey-run-card .sd-title__text,
+  .survey-run-card .sv-string-viewer,
+  .survey-run-card .sd-selectbase__item .sd-selectbase__label,
+  .survey-run-card .sd-selectbase__item .sd-item__text { color: var(--foreground) !important; }
+  .survey-run-card .sd-root-modern, .survey-run-card .sd-body, .survey-run-card .sd-element, .survey-run-card .sd-element__title, .survey-run-card .sd-element__header, .survey-run-card label, .survey-run-card .sv-action__content, .survey-run-card .sv-string-editor, .survey-run-card .sd-comment { color: var(--foreground) !important; }
+  .survey-run-card .sd-table, .survey-run-card .sd-table__cell, .survey-run-card .sd-table__cell--header, .survey-run-card .sd-matrix__header, .survey-run-card .sd-matrix__cell, .survey-run-card .sd-matrix__cell--header { color: var(--foreground) !important; }
+  .survey-run-card .sv-rating__item-text { color: var(--foreground) !important; }
+  .survey-run-card .sd-selectbase__item .sd-item__text { opacity: 1 !important; }
+  .survey-run-card .sd-checkbox__caption, .survey-run-card .sd-radio__caption, .survey-run-card .sd-checkbox__label, .survey-run-card .sd-radio__label { color: var(--foreground) !important; }
+  .survey-run-card .sd-title, .survey-run-card .sd-description, .survey-run-card .sd-question__title { opacity: 1 !important; }
 
-    .survey-run-card a { color: var(--primary); }
+  .survey-run-card a { color: var(--primary); }
+  .survey-run-card .sd-selectbase__item, .survey-run-card .sd-selectbase__item *, .survey-run-card .sd-checkbox, .survey-run-card .sd-radio, .survey-run-card .sd-checkbox *, .survey-run-card .sd-radio * { color: var(--foreground) !important; }
+  .survey-run-card .sd-item--disabled .sd-item__text { opacity: .7 !important; }
 
-    /* Stronger override for checkbox/radio option texts (covers nested spans) */
-    .survey-run-card .sd-selectbase__item,
-    .survey-run-card .sd-selectbase__item *,
-    .survey-run-card .sd-checkbox,
-    .survey-run-card .sd-radio,
-    .survey-run-card .sd-checkbox *,
-    .survey-run-card .sd-radio * {
-        color: var(--foreground) !important;
-    }
-    /* Avoid opacity dim on disabled items making text invisible */
-    .survey-run-card .sd-item--disabled .sd-item__text { opacity: .7 !important; }
+  .survey-run-card { --sjs-general-forecolor: var(--foreground); --sjs-general-forecolor-light: color-mix(in oklch, var(--foreground), transparent 35%); --sjs-questionpanel-textcolor: var(--foreground); --sjs-editorfont-color: var(--foreground); --sjs-font-editorfont-color: var(--foreground); }
+  .survey-run-card .sd-error { color: var(--destructive-foreground) !important; background-color: color-mix(in oklch, var(--destructive), white 90%) !important; border: 1px solid color-mix(in oklch, var(--destructive), var(--foreground) 12%) !important; border-radius: .5rem; padding: .25rem .5rem; }
 
+  .survey-run-card .sd-page { display: grid; gap: 14px; }
+  .survey-run-card .sd-question { position: relative; background: color-mix(in oklch, var(--background), white 12%) !important; border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 8%) !important; border-radius: 14px; padding: 14px 16px 16px 18px; transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease, transform .2s ease; }
+  html:not(.dark) .survey-run-card .sd-question { background: color-mix(in oklch, var(--background), black 2%) !important; border-color: color-mix(in oklch, var(--border), black 6%) !important; }
+  .survey-run-card .sd-question::before { content:""; position: absolute; left:0; top:0; bottom:0; width:3px; border-top-left-radius:14px; border-bottom-left-radius:14px; background: linear-gradient(180deg, color-mix(in oklch, var(--primary), transparent 10%), color-mix(in oklch, var(--accent), transparent 10%)); opacity:.9; }
+  .survey-run-card .sd-question:hover { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in oklch, var(--primary), transparent 92%); }
+  .survey-run-card .sd-question:focus-within { border-color: color-mix(in oklch, var(--primary), white 22%) !important; box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary), transparent 82%); background: color-mix(in oklch, var(--background), white 16%) !important; }
 
-    /* Strengthen SurveyJS color variables to avoid unexpected overrides */
-    .survey-run-card {
-        --sjs-general-forecolor: var(--foreground);
-        --sjs-general-forecolor-light: color-mix(in oklch, var(--foreground), transparent 35%);
-        --sjs-questionpanel-textcolor: var(--foreground);
-        --sjs-editorfont-color: var(--foreground);
-        --sjs-font-editorfont-color: var(--foreground);
-    }
-    .survey-run-card .sd-error {
-        color: var(--destructive-foreground) !important;
-        background-color: color-mix(in oklch, var(--destructive), white 90%) !important;
-        border: 1px solid color-mix(in oklch, var(--destructive), var(--foreground) 12%) !important;
-        border-radius: .5rem; padding: .25rem .5rem;
-    }
+  .sejuk-progress { background: color-mix(in oklch, var(--muted), var(--background) 30%); }
+  .sejuk-progress-bar { background-image: linear-gradient(90deg, color-mix(in oklch, var(--primary), white 10%), color-mix(in oklch, var(--accent), white 10%)); box-shadow: 0 0 12px color-mix(in oklch, var(--primary), transparent 80%); transition: width .25s ease; }
 
-    /* Layout & question blocks */
-    .survey-run-card .sd-page { display: grid; gap: 14px; }
-    .survey-run-card .sd-question {
-        position: relative;
-        background: color-mix(in oklch, var(--background), white 12%) !important;
-        border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 8%) !important;
-        border-radius: 14px;
-        padding: 14px 16px 16px 18px;
-        transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease, transform .2s ease;
-    }
-    html:not(.dark) .survey-run-card .sd-question {
-        background: color-mix(in oklch, var(--background), black 2%) !important;
-        border-color: color-mix(in oklch, var(--border), black 6%) !important;
-    }
-    .survey-run-card .sd-question::before {
-        content: "";
-        position: absolute; left: 0; top: 0; bottom: 0;
-        width: 3px; border-top-left-radius: 14px; border-bottom-left-radius: 14px;
-        background: linear-gradient(
-            180deg,
-            color-mix(in oklch, var(--primary), transparent 10%),
-            color-mix(in oklch, var(--accent), transparent 10%)
-        );
-        opacity: .9;
-    }
-    .survey-run-card .sd-question:hover { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in oklch, var(--primary), transparent 92%); }
-    .survey-run-card .sd-question:focus-within {
-        border-color: color-mix(in oklch, var(--primary), white 22%) !important;
-        box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary), transparent 82%);
-        background: color-mix(in oklch, var(--background), white 16%) !important;
-    }
+  .step-dot { width: 6px; height: 6px; border-radius: 9999px; background: color-mix(in oklch, var(--muted-foreground), transparent 60%); transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+  .step-dot.active { background: var(--primary); transform: scale(1.05); box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary), transparent 86%); }
 
-    /* Sejuk progress header */
-    .sejuk-progress { background: color-mix(in oklch, var(--muted), var(--background) 30%); }
-    .sejuk-progress-bar {
-        background-image: linear-gradient(90deg,
-            color-mix(in oklch, var(--primary), white 10%),
-            color-mix(in oklch, var(--accent), white 10%)
-        );
-        box-shadow: 0 0 12px color-mix(in oklch, var(--primary), transparent 80%);
-        transition: width .25s ease;
-    }
+  .kbd { display: inline-flex; align-items:center; justify-content:center; min-width:1.2rem; height:1.2rem; padding:0 .3rem; border-radius:.375rem; border:1px solid var(--border); background: color-mix(in oklch, var(--background), white 6%); color: color-mix(in oklch, var(--foreground), transparent 15%); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:10px; line-height:1; }
 
-    /* Step dots (calm, subtle) */
-    .step-dot {
-        width: 6px; height: 6px; border-radius: 9999px;
-        background: color-mix(in oklch, var(--muted-foreground), transparent 60%);
-        transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease;
-    }
-    .step-dot.active {
-        background: var(--primary);
-        transform: scale(1.05);
-        box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary), transparent 86%);
-    }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-    /* Small keyboard hint chip */
-    .kbd {
-        display: inline-flex; align-items: center; justify-content: center;
-        min-width: 1.2rem; height: 1.2rem; padding: 0 .3rem;
-        border-radius: .375rem; border: 1px solid var(--border);
-        background: color-mix(in oklch, var(--background), white 6%);
-        color: color-mix(in oklch, var(--foreground), transparent 15%);
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        font-size: 10px; line-height: 1;
-    }
+  .survey-run-card .sd-input,
+  .survey-run-card .sd-text,
+  .survey-run-card input,
+  .survey-run-card textarea,
+  .survey-run-card select,
+  .survey-run-card .sd-selectbase { background-color: color-mix(in oklch, var(--background), white 92%) !important; color: var(--foreground) !important; border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 10%) !important; border-radius: 10px !important; transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; min-height: 44px; padding: 10px 12px; box-shadow: inset 0 0 0 1px transparent !important; }
+  html.dark .survey-run-card .sd-input,
+  html.dark .survey-run-card .sd-text,
+  html.dark .survey-run-card input,
+  html.dark .survey-run-card textarea,
+  html.dark .survey-run-card select,
+  html.dark .survey-run-card .sd-selectbase { background-color: color-mix(in oklch, var(--background), white 10%) !important; color: var(--foreground) !important; border-color: color-mix(in oklch, var(--border), white 12%) !important; }
+  .survey-run-card ::placeholder { color: color-mix(in oklch, var(--foreground), transparent 60%); }
 
-    /* Respect safe-area inset for iOS */
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    .survey-run-card .sd-input,
-    .survey-run-card .sd-text,
-    .survey-run-card input,
-    .survey-run-card textarea,
-    .survey-run-card select,
-    .survey-run-card .sd-selectbase {
-        /* Light mode: bright input */
-        background-color: color-mix(in oklch, var(--background), white 92%) !important;
-        color: var(--foreground) !important;
-        border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 10%) !important;
-        border-radius: 10px !important;
-        transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
-        min-height: 44px;
-        padding: 10px 12px;
-        /* Remove default SurveyJS dark inner shadow */
-        box-shadow: inset 0 0 0 1px transparent !important;
-    }
-    html.dark .survey-run-card .sd-input,
-    html.dark .survey-run-card .sd-text,
-    html.dark .survey-run-card input,
-    html.dark .survey-run-card textarea,
-    html.dark .survey-run-card select,
-    html.dark .survey-run-card .sd-selectbase {
-        /* Dark mode: translucent glass input */
-        background-color: color-mix(in oklch, var(--background), white 10%) !important;
-        color: var(--foreground) !important;
-        border-color: color-mix(in oklch, var(--border), white 12%) !important;
-    }
-    .survey-run-card ::placeholder {
-        color: color-mix(in oklch, var(--foreground), transparent 60%);
-    }
-    .survey-run-card .sd-input:focus,
-    .survey-run-card .sd-text:focus,
-    .survey-run-card input:focus,
-    .survey-run-card textarea:focus,
-    .survey-run-card select:focus,
-    .survey-run-card .sd-selectbase:focus {
-        outline: none !important;
-        border-color: var(--primary) !important;
-        box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary), transparent 72%) !important;
-        background-color: color-mix(in oklch, var(--background), white 96%) !important;
-    }
-    html.dark .survey-run-card .sd-input:focus,
-    html.dark .survey-run-card .sd-text:focus,
-    html.dark .survey-run-card input:focus,
-    html.dark .survey-run-card textarea:focus,
-    html.dark .survey-run-card select:focus,
-    html.dark .survey-run-card .sd-selectbase:focus {
-        background-color: color-mix(in oklch, var(--background), white 12%) !important;
-    }
+  .survey-run-card .sd-input:focus,
+  .survey-run-card .sd-text:focus,
+  .survey-run-card input:focus,
+  .survey-run-card textarea:focus,
+  .survey-run-card select:focus,
+  .survey-run-card .sd-selectbase:focus { outline: none !important; border-color: var(--primary) !important; box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary), transparent 72%) !important; background-color: color-mix(in oklch, var(--background), white 96%) !important; }
+  html.dark .survey-run-card .sd-input:focus,
+  html.dark .survey-run-card .sd-text:focus,
+  html.dark .survey-run-card input:focus,
+  html.dark .survey-run-card textarea:focus,
+  html.dark .survey-run-card select:focus,
+  html.dark .survey-run-card .sd-selectbase:focus { background-color: color-mix(in oklch, var(--background), white 12%) !important; }
 
-    /* Radios / checkboxes leverage browser accent color */
-    .survey-run-card input[type='checkbox'],
-    .survey-run-card input[type='radio'] { accent-color: oklch(0.7 0.12 250); }
+  .survey-run-card input[type='checkbox'],
+  .survey-run-card input[type='radio'] { accent-color: oklch(0.7 0.12 250); }
 
-    /* SurveyJS buttons (e.g., file upload choose button) */
-    .survey-run-card .sd-btn {
-        background-color: var(--primary) !important;
-        color: var(--primary-foreground) !important;
-        border: 0 !important;
-        border-radius: .5rem !important;
-    }
-    .survey-run-card .sd-btn:hover {
-        filter: brightness(.95);
-    }
+  .survey-run-card .sd-btn { background-color: var(--primary) !important; color: var(--primary-foreground) !important; border: 0 !important; border-radius: .5rem !important; }
+  .survey-run-card .sd-btn:hover { filter: brightness(.95); }
 
-    /* Page wrapper gradient background for runner */
-    .survey-run-wrap {
-        position: relative;
-    }
-    .survey-run-wrap::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        background-image:
-          radial-gradient(800px 500px at 8% 0%, color-mix(in oklch, var(--primary), transparent 82%), transparent 60%),
-          radial-gradient(700px 400px at 92% 4%, color-mix(in oklch, var(--accent), transparent 85%), transparent 60%),
-          linear-gradient(135deg, color-mix(in oklch, var(--background), black 4%), color-mix(in oklch, var(--background), black 6%));
-        background-attachment: fixed;
-    }
-    .sv-rating__item .sv-rating__icon {
-        @apply text-gray-300;
-    }
-    .sv-rating__item--selected .sv-rating__icon,
-    .sv-rating__item:hover .sv-rating__icon {
-        @apply text-yellow-400;
-    }
-    .sv-btn {
-        @apply bg-primary text-primary-foreground rounded px-4 py-2;
-    }
+  .survey-run-wrap { position: relative; }
+  .survey-run-wrap::before { content:""; position: fixed; inset: 0; z-index: -1; background-image: radial-gradient(800px 500px at 8% 0%, color-mix(in oklch, var(--primary), transparent 82%), transparent 60%), radial-gradient(700px 400px at 92% 4%, color-mix(in oklch, var(--accent), transparent 85%), transparent 60%), linear-gradient(135deg, color-mix(in oklch, var(--background), black 4%), color-mix(in oklch, var(--background), black 6%)); background-attachment: fixed; }
+
+  .sv-rating__item .sv-rating__icon { color: var(--color-glacier, #3BA3F4); opacity: .35; transition: opacity .15s ease; }
+  .sv-rating__item--selected .sv-rating__icon,
+  .sv-rating__item:hover .sv-rating__icon { color: var(--color-glacier, #3BA3F4); opacity: 1; }
+  .sv-btn { @apply bg-primary text-primary-foreground rounded px-4 py-2; }
 }
 
-/* Brand Theme Variants (optional: set on <html> class) */
-html.theme-lime {
-    --primary: oklch(0.83 0.2 128);
-    --primary-foreground: oklch(0.2 0 0);
-    --accent: oklch(0.78 0.18 85);
-    --accent-foreground: oklch(0.18 0 0);
-}
-html.dark.theme-lime {
-    --primary: oklch(0.86 0.2 128);
-    --primary-foreground: oklch(0.13 0 0);
-    --accent: oklch(0.85 0.2 85);
-    --accent-foreground: oklch(0.12 0 0);
-}
+/* Brand Theme Variants */
+html.theme-lime { --primary: oklch(0.83 0.2 128); --primary-foreground: oklch(0.2 0 0); --accent: oklch(0.78 0.18 85); --accent-foreground: oklch(0.18 0 0); }
+html.dark.theme-lime { --primary: oklch(0.86 0.2 128); --primary-foreground: oklch(0.13 0 0); --accent: oklch(0.85 0.2 85); --accent-foreground: oklch(0.12 0 0); }
 
-html.theme-emerald {
-    --primary: oklch(0.7 0.17 160);
-    --primary-foreground: oklch(0.14 0 0);
-    --accent: oklch(0.75 0.17 200);
-    --accent-foreground: oklch(0.14 0 0);
-}
-html.dark.theme-emerald {
-    --primary: oklch(0.78 0.18 160);
-    --primary-foreground: oklch(0.12 0 0);
-    --accent: oklch(0.8 0.18 200);
-    --accent-foreground: oklch(0.12 0 0);
-}
+html.theme-emerald { --primary: oklch(0.7 0.17 160); --primary-foreground: oklch(0.14 0 0); --accent: oklch(0.75 0.17 200); --accent-foreground: oklch(0.14 0 0); }
+html.dark.theme-emerald { --primary: oklch(0.78 0.18 160); --primary-foreground: oklch(0.12 0 0); --accent: oklch(0.8 0.18 200); --accent-foreground: oklch(0.12 0 0); }
 
-html.theme-sunset {
-    --primary: oklch(0.72 0.22 30);
-    --primary-foreground: oklch(0.13 0 0);
-    --accent: oklch(0.7 0.23 350);
-    --accent-foreground: oklch(0.13 0 0);
-}
-html.dark.theme-sunset {
-    --primary: oklch(0.78 0.24 30);
-    --primary-foreground: oklch(0.12 0 0);
-    --accent: oklch(0.76 0.24 350);
-    --accent-foreground: oklch(0.12 0 0);
-}
+html.theme-sunset { --primary: oklch(0.72 0.22 30); --primary-foreground: oklch(0.13 0 0); --accent: oklch(0.7 0.23 350); --accent-foreground: oklch(0.13 0 0); }
+html.dark.theme-sunset { --primary: oklch(0.78 0.24 30); --primary-foreground: oklch(0.12 0 0); --accent: oklch(0.76 0.24 350); --accent-foreground: oklch(0.12 0 0); }
 
-/* NProgress styling */
+/* NProgress */
 #nprogress { pointer-events: none; z-index: 9999; }
-#nprogress .bar {
-  background: var(--primary) !important;
-  height: 3px !important;
-}
+#nprogress .bar { background: var(--primary) !important; height: 3px !important; }
 #nprogress .spinner { display: none !important; }
 #nprogress .peg { box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary) !important; }
 
-/* Enhanced animation & sheen */
 @keyframes nprogress-gradient { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
-#nprogress .bar {
-  background-image: linear-gradient(90deg, var(--primary) 0%, color-mix(in oklch, var(--primary), white 18%) 50%, var(--primary) 100%) !important;
-  background-size: 200% 100%;
-  animation: nprogress-gradient 1.5s linear infinite;
-}
-#nprogress .bar::after {
-  content: "";
-  position: absolute; right: 0; top: 0; height: 100%; width: 120px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  filter: blur(4px); opacity: .8;
-}
+#nprogress .bar { background-image: linear-gradient(90deg, var(--primary) 0%, color-mix(in oklch, var(--primary), white 18%) 50%, var(--primary) 100%) !important; background-size: 200% 100%; animation: nprogress-gradient 1.5s linear infinite; }
+#nprogress .bar::after { content: ""; position: absolute; right: 0; top: 0; height: 100%; width: 120px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); filter: blur(4px); opacity: .8; }
 
-/* Blur the app topbar while loading */
-body.nprogress-busy [data-app-topbar] {
-  backdrop-filter: blur(8px) saturate(140%);
-  -webkit-backdrop-filter: blur(8px) saturate(140%);
-  transition: background-color .2s ease, backdrop-filter .2s ease;
-  background-color: color-mix(in oklch, var(--background), white 8%);
-}
+/* Busy blur */
+body.nprogress-busy [data-app-topbar] { backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%); transition: background-color .2s ease, backdrop-filter .2s ease; background-color: color-mix(in oklch, var(--background), white 8%); }
 
-
+/* Global background */
+html, body { min-height: 100%; }
+body { background: linear-gradient(#ffffff, #F8FAFC); }

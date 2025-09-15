@@ -18,16 +18,16 @@ export default function Responses({ survey, responses }: PageProps) {
     <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title={`Respon - ${survey.title}`} />
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Respon - {survey.title}</h1>
+        <h1 className="text-2xl md:text-3xl font-semibold text-slate-700">Respon — {survey.title}</h1>
         <div className="flex gap-2">
-          <Button asChild variant="secondary">
+          <Button asChild variant="outline" className="border-glacier text-glacier hover:bg-glacier/10">
             <a
               href={routeOr('surveys.export.csv', survey.id, `/surveys/${survey.id}/export/csv`)}
             >
               Ekspor CSV
             </a>
           </Button>
-          <Button asChild variant="secondary">
+          <Button asChild variant="outline" className="border-glacier text-glacier hover:bg-glacier/10">
             <a
               href={routeOr('surveys.export.json', survey.id, `/surveys/${survey.id}/export/json`)}
             >
@@ -36,29 +36,29 @@ export default function Responses({ survey, responses }: PageProps) {
           </Button>
         </div>
       </div>
-      <Card className="card-accent">
-        <CardHeader>
-          <CardTitle>Daftar Respon</CardTitle>
+      <Card className="frost-card">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-slate-700">Daftar Respon</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-muted-foreground">
+              <thead className="text-left text-slate-500">
                 <tr>
-                  <th className="p-2">UUID</th>
-                  <th className="p-2 text-center">Waktu Submit</th>
-                  <th className="p-2 text-right">Aksi</th>
+                  <th className="p-2 font-medium">UUID</th>
+                  <th className="p-2 text-center font-medium">Waktu Submit</th>
+                  <th className="p-2 text-right font-medium">Aksi</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {responses.data.map((r) => (
-                  <tr key={r.id} className="border-t">
-                    <td className="p-2 font-mono text-xs">{r.response_uuid}</td>
-                    <td className="p-2 text-center">{r.submitted_at}</td>
+                  <tr key={r.id} className="odd:bg-white/40 hover:bg-glacier/5 transition ease-frost">
+                    <td className="p-2 font-mono text-[11px] md:text-xs text-slate-700">{r.response_uuid}</td>
+                    <td className="p-2 text-center text-slate-700">{r.submitted_at}</td>
                     <td className="p-2 text-right">
                       <Link
                         href={routeOr('surveys.responses.show', [survey.id, r.id], `/surveys/${survey.id}/responses/${r.id}`)}
-                        className="text-primary underline-offset-4 hover:underline"
+                        className="text-glacier underline-offset-4 hover:underline"
                       >
                         Detail
                       </Link>

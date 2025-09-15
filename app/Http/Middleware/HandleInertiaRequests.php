@@ -24,6 +24,13 @@ class HandleInertiaRequests extends Middleware
      */
     public function version(Request $request): ?string
     {
+        // Avoid 409 Conflict during local development caused by frequent
+        // asset version changes (e.g., Vite HMR). In production, keep
+        // the default behavior so Inertia can reload on deploys.
+        if (app()->environment('local')) {
+            return null; // disables asset version check in local
+        }
+
         return parent::version($request);
     }
 

@@ -1,199 +1,213 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
-import { routeOr } from "@/lib/route";
-import type { SharedData } from "@/types";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, ArrowRight, LayoutDashboard, LogIn } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { routeOr } from "@/lib/route";
 
-type Survey = { id: number; title: string; slug: string };
+// ---------- UI Primitives ----------
+type FrostButtonProps = React.ComponentProps<typeof Button> & {
+  variant?: "default" | "secondary";
+};
 
-export default function Landing({ surveys }: { surveys: Survey[] }) {
-  const { auth } = usePage<SharedData>().props;
-  const [q, setQ] = React.useState("");
-  const [focused, setFocused] = React.useState(false);
-  const filtered = React.useMemo(
-    () => surveys.filter((s) => (`${s.title} ${s.slug}`).toLowerCase().includes(q.toLowerCase())),
-    [surveys, q]
+function FrostButton({ className, variant = "default", ...props }: FrostButtonProps) {
+  return (
+    <Button
+      variant={variant === "secondary" ? "secondary" : "default"}
+      className={cn(
+        "rounded-2xl px-5 h-11 shadow-sm transition-transform active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2",
+        className
+      )}
+      {...props}
+    />
   );
+}
 
-  // Hotkey: "/" fokus ke search
-  React.useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        e.preventDefault();
-        const el = document.getElementById("landing-search") as HTMLInputElement | null;
-        el?.focus();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+function FrostCard({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn(
+        // Frosted-glass look without needing custom CSS
+        "rounded-3xl border bg-white/70 backdrop-blur-xl shadow-sm ring-1 ring-black/5",
+        "p-6",
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
-  const firstHref = filtered[0]
-    ? routeOr("run.show", filtered[0].slug, `/s/${filtered[0].slug}`)
-    : surveys[0]
-      ? routeOr("run.show", surveys[0].slug, `/s/${surveys[0].slug}`)
-      : routeOr("login", undefined, "/login");
+// ---------- Helpers ----------
+function useFilteredSurveys<T extends { title: string; slug: string }>(surveys: T[] | undefined, q: string) {
+  const query = q.trim().toLowerCase();
+  return React.useMemo(() => {
+    if (!surveys?.length) return [] as T[];
+    if (!query) return surveys;
+    return surveys.filter((s) =>
+      [s.title, s.slug].some((v) => v?.toLowerCase().includes(query))
+    );
+  }, [surveys, query]);
+}
+
+export default function LandingPage() {
+  const startHref = routeOr("surveys.index", undefined, "/surveys");
+  const { surveys } = usePage().props as {
+    surveys: { id: number; title: string; slug: string }[] | undefined;
+  };
+
+  const [q, setQ] = React.useState("");
+  const [lang, setLang] = React.useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      return url.searchParams.get("lang") || "id";
+    }
+    return "id";
+  });
+
+  const filtered = useFilteredSurveys(surveys, q);
+
+  function switchLang(next: string) {
+    setLang(next);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", next);
+      window.location.assign(url.toString());
+    }
+  }
 
   return (
-    <div className="landing-wrap relative min-h-screen overflow-hidden text-foreground">
-      <Head title="Survei Kementerian Perhubungan - Partisipasi Publik & Kepuasan Layanan" />
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Aurora background */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-white to-slate-50" />
+        <div className="absolute -top-32 left-1/2 h-[38rem] w-[38rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-sky-400/20 via-blue-300/10 to-indigo-300/10 blur-3xl" />
+        <div className="absolute bottom-[-10rem] right-[-6rem] h-[28rem] w-[28rem] rounded-full bg-gradient-to-tr from-cyan-300/20 via-emerald-300/10 to-transparent blur-3xl" />
+      </div>
 
-      {/* Header */}
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-        <div className="flex items-center gap-2">
-          <span className="text-base font-semibold tracking-wide sm:text-lg">Survey Kemenhub</span>
-          <Badge variant="secondary" className="hidden sm:inline-flex">Beta</Badge>
-        </div>
-        {auth?.user ? (
-          <Button asChild variant="secondary">
-            <Link href={routeOr("dashboard", undefined, "/dashboard")} className="inline-flex items-center gap-2">
-              <LayoutDashboard className="h-4 w-4" /> Dashboard
-            </Link>
-          </Button>
-        ) : (
-          <Button asChild variant="secondary">
-            <Link href={routeOr("login", undefined, "/login")} className="inline-flex items-center gap-2">
-              <LogIn className="h-4 w-4" /> Masuk
-            </Link>
-          </Button>
-        )}
-      </header>
+      <Head title="Bantu kami jadi lebih baik" />
 
-      <main className="pb-12">
+      <div className="mx-auto w-full max-w-4xl px-5 py-10 md:py-16">
+        {/* Header */}
+        <header className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img src="/logo.svg" alt="Logo Lembaga" className="h-10 w-auto" />
+            <span className="sr-only">Lembaga</span>
+          </div>
+
+          {/* Language switcher - native select for zero dependency */}
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <span className="hidden sm:inline">Bahasa</span>
+            <select
+              className="rounded-xl border bg-white/70 px-3 py-2 text-sm shadow-sm hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              value={lang}
+              onChange={(e) => switchLang(e.target.value)}
+            >
+              <option value="id">Indonesia</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+        </header>
+
         {/* Hero */}
-        <section className="mx-auto max-w-7xl px-6 py-6 text-center">
-          <h1 className="heading-hero mx-auto max-w-3xl">
-            Partisipasi Anda <span className="landing-hero-accent">mendorong</span> layanan lebih baik
+        <section className="mt-10 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-800 md:text-5xl">
+            Bantu kami jadi lebih baik ❄️
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-base text-foreground/80 sm:text-lg">
-            Pilih survei yang tersedia dan sampaikan masukan Anda. Ringan, aman, dan responsif di semua perangkat.
+          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
+            Isi survei ±60 detik. Jawaban anonim — datamu aman.
           </p>
 
-          {/* CTA group */}
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild>
-              <a href={firstHref} className="inline-flex items-center gap-2">
-                Mulai survei <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button asChild variant="outline">
-              <a href="#surveys" className="inline-flex items-center gap-2">
-                Lihat Daftar
-              </a>
-            </Button>
-          </div>
+          <FrostCard className="mx-auto mt-6 max-w-xl">
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {/* Prefer SPA navigation via Inertia Link */}
+              <FrostButton asChild className="w-full sm:w-auto">
+                <Link href={startHref}>
+                  Mulai Survei
+                  <span className="ml-2 inline-block transition-transform group-hover:translate-x-0.5">→</span>
+                </Link>
+              </FrostButton>
 
-          {/* Quick stats */}
-          <div className="mx-auto mt-6 grid max-w-3xl grid-cols-3 gap-2 text-xs text-foreground/80 sm:text-sm">
-            <div className="rounded-lg border border-border/50 bg-background/40 p-2">
-              <div className="font-semibold text-foreground">{surveys.length}</div>
-              <div>survei aktif</div>
+              <div className="w-full sm:w-auto">
+                <div className="text-xs text-slate-500 sm:text-sm">Atau pilih survei di bawah</div>
+              </div>
             </div>
-            <div className="rounded-lg border border-border/50 bg-background/40 p-2">
-              <div className="font-semibold text-foreground">Cepat</div>
-              <div>3-5 menit</div>
-            </div>
-            <div className="rounded-lg border border-border/50 bg-background/40 p-2">
-              <div className="font-semibold text-foreground">Aman</div>
-              <div>Data terjaga</div>
-            </div>
+          </FrostCard>
+
+          {/* Trust & privacy */}
+          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500 md:text-sm">
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden>
+              <path d="M12 3l8 4v5c0 5-3.4 9.4-8 9.9C7.4 21.4 4 17 4 12V7l8-4z" className="stroke-current" strokeWidth="1.2" />
+              <path d="M8.5 12l2 2 5-5" className="stroke-current" strokeWidth="1.2" />
+            </svg>
+            Data dienkripsi & hanya untuk analitik layanan
           </div>
         </section>
 
-        {/* Search */}
-        <section className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto flex max-w-2xl items-center gap-2">
-            <div className="relative w-full">
-              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 opacity-70" />
-              <Input
-                id="landing-search"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                placeholder="Cari judul atau slug survei (tekan /)"
-                className="w-full rounded-xl border-border/50 bg-background/40 pl-10 text-foreground placeholder:text-foreground/60 focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Cari survei"
-              />
-              <span className={`pointer-events-none absolute right-3 top-2.5 hidden select-none rounded-md border border-border/50 bg-background/40 px-1.5 py-0.5 text-[10px] text-foreground/80 sm:inline-block ${focused ? "opacity-0" : "opacity-100"}`} aria-hidden>
-                /
-              </span>
+        {/* Search & count */}
+        <section className="mt-12">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-800">Daftar Survei</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                {surveys?.length ? (
+                  <>
+                    {filtered.length} dari {surveys.length} tersedia
+                  </>
+                ) : (
+                  <>Tidak ada survei saat ini</>
+                )}
+              </p>
             </div>
-            <Badge variant="secondary" className="hidden sm:inline-flex">{filtered.length} hasil</Badge>
-          </div>
-        </section>
 
-        {/* Survey Grid */}
-        <section id="surveys" className="mx-auto max-w-7xl px-6 py-10">
-          {filtered.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((survey) => (
+            <div className="w-full sm:w-80">
+              <label className="block text-sm text-slate-600">
+                <span className="sr-only">Cari survei</span>
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Cari judul atau slug…"
+                  className={
+                    "w-full rounded-2xl border bg-white/70 px-4 py-2 shadow-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                  }
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* List */}
+          {filtered?.length ? (
+            <div className="mt-5 grid grid-cols-1 gap-3">
+              {filtered.map((s) => (
                 <Link
-                  key={survey.id}
-                  href={routeOr("run.show", survey.slug, `/s/${survey.slug}`)}
-                  aria-label={`Buka survei ${survey.title}`}
-                  className="group relative rounded-2xl p-5 transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring card-accent"
+                  key={s.id}
+                  href={routeOr("run.show", s.slug, `/s/${s.slug}`)}
+                  className={cn(
+                    "group block rounded-2xl border bg-white/70 p-4 shadow-sm ring-1 ring-black/5 transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                  )}
                 >
-                  <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary/70 via-accent/70 to-primary/70 opacity-70" />
-                  <h2 className="line-clamp-2 pr-8 text-left text-lg font-semibold tracking-tight">{survey.title}</h2>
-                  <p className="mt-1 text-left text-sm text-foreground/70">/{survey.slug}</p>
-                  <div className="mt-4 inline-flex items-center gap-2 text-sm landing-hero-accent transition group-hover:translate-x-0.5">
-                    Mulai <ArrowRight className="h-4 w-4" />
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-base font-medium text-slate-800">{s.title}</div>
+                      <div className="truncate text-xs text-slate-500">/s/{s.slug}</div>
+                    </div>
+                    <span className="shrink-0 text-sm text-sky-700 transition-transform group-hover:translate-x-0.5">
+                      Mulai →
+                    </span>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-border/50 bg-background/40 p-10 text-center">
-              <p className="text-sm text-foreground/80">Tidak ada survei yang cocok.</p>
-              <div className="mt-4 flex items-center justify-center gap-2">
-                <Button variant="secondary" onClick={() => setQ("")}>Reset</Button>
-                {auth?.user ? (
-                  <Button asChild>
-                    <Link href={routeOr("surveys.create", undefined, "/surveys/create")} className="inline-flex items-center gap-2">
-                      Buat Survei
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button asChild>
-                    <Link href={routeOr("login", undefined, "/login")} className="inline-flex items-center gap-2">
-                      Masuk untuk Membuat
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            </div>
+            <FrostCard className="mt-5 text-center text-slate-600">
+              Belum ada survei yang tersedia.
+            </FrostCard>
           )}
         </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="mx-auto max-w-7xl px-6 pb-10">
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-border/50 pt-6 text-sm text-foreground/70 sm:flex-row">
-          <p>c {new Date().getFullYear()} Kementerian Perhubungan - Semua hak dilindungi</p>
-          <div className="flex items-center gap-4">
-            {auth?.user ? (
-              <Link href={routeOr("dashboard", undefined, "/dashboard")} className="inline-flex items-center gap-1 hover:text-foreground">
-                <LayoutDashboard className="h-4 w-4" /> Dashboard
-              </Link>
-            ) : (
-              <Link href={routeOr("login", undefined, "/login")} className="inline-flex items-center gap-1 hover:text-foreground">
-                <LogIn className="h-4 w-4" /> Masuk
-              </Link>
-            )}
-            <a href="#surveys" className="hover:text-foreground">Daftar Survei</a>
-          </div>
-        </div>
-      </footer>
+        {/* Footer */}
+        <footer className="mt-16 border-t pt-6 text-center text-xs text-slate-500">
+          © {new Date().getFullYear()} — Terima kasih sudah membantu kami.
+        </footer>
+      </div>
     </div>
   );
 }
-
-
-
-
-
-

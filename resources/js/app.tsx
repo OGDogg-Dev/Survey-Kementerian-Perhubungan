@@ -26,6 +26,16 @@ import AppProviders from './providers/AppProviders';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+// Ensure no legacy Service Worker remains registered (disable PWA)
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  // Unregister any existing SWs registered from previous builds
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    for (const reg of regs) {
+      reg.unregister().catch(() => {});
+    }
+  }).catch(() => {});
+}
+
 createInertiaApp({
     title: (title) => title ? `${title} - ${appName}` : appName,
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),

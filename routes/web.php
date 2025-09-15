@@ -5,6 +5,13 @@ use Inertia\Inertia;
 use App\Http\Controllers\SurveyAnalyticsController;
 use App\Models\Survey;
 
+// Explicitly disable service worker. Return 404 for /sw.js quickly.
+Route::get('/sw.js', function () {
+    return response('', 404)
+        ->header('Content-Type', 'application/javascript')
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+})->name('sw.js');
+
 Route::get('/', function () {
     $surveys = Survey::published()
         ->select('id', 'title', 'slug')
