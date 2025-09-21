@@ -1,5 +1,5 @@
 // Components
-import EmailVerificationNotificationController from '@/actions/App/Http/Controllers/Auth/EmailVerificationNotificationController';
+import { EmailVerificationNotificationController } from '@/lib/controller-actions';
 import { routeOr } from '@/lib/route';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';

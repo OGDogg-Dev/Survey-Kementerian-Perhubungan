@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\SurveySession;
+use App\Models\SurveyResponse;
 
 class Survey extends Model
 {
@@ -21,6 +23,10 @@ class Survey extends Model
         return $this->hasMany(SurveyResponse::class);
     }
 
+    public function sessions()
+    {
+        return $this->hasMany(SurveySession::class);
+    }
     public function scopePublished($q) {
         return $q->where('status','published');
     }

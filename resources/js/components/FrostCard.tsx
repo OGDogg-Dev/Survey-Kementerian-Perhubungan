@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-export default function FrostCard({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div className={cn('frost-card p-6', className)} {...props} />
+type FrostCardProps = React.ComponentProps<'div'> & {
+  padded?: boolean
 }
 
+export default function FrostCard({ className, padded = true, ...props }: FrostCardProps) {
+  return <div className={cn('frost-card', padded && 'p-6', className)} {...props} />
+}

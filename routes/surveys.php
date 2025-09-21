@@ -25,3 +25,6 @@ Route::middleware(['auth','verified','admin'])->group(function () {
 // Public runner
 Route::get('/s/{slug}', [SurveyRunController::class, 'show'])->name('run.show');
 Route::post('/s/{slug}', [SurveyRunController::class, 'submit'])->name('run.submit')->middleware('throttle:20,1');
+Route::post('/s/{slug}/session', [SurveyRunController::class, 'saveSession'])->name('run.session.store');
+Route::get('/run/session/{token}', [SurveyRunController::class, 'resume'])->name('run.session.resume');
+

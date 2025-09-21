@@ -1,22 +1,259 @@
-﻿import { Head, router, usePage } from "@inertiajs/react";
-import { Model } from "survey-core";
+import { Head, router, usePage } from "@inertiajs/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Model, Question } from "survey-core";
 import { Survey } from "survey-react-ui";
 import { routeOr } from "@/lib/route";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import FrostCard from "@/components/FrostCard";
 import FrostButton from "@/components/FrostButton";
-import StepperProgress from "@/components/StepperProgress";
-import { ChevronLeft, ChevronRight, SendHorizonal } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ChevronLeft, ChevronRight, Edit3, SendHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type SurveySessionDTO = {
+  token: string;
+  answers: Record<string, unknown> | null;
+  resume_url?: string | null;
+  expires_at?: string | null;
+} | null;
 
 type PageProps = {
   survey: { id: number; title: string; slug: string; schema: unknown };
   flash?: { ok?: string };
+  session?: SurveySessionDTO;
 };
 
+type Mode = "form" | "review";
+
+const CANONICAL_STEP_TITLES = [
+  "Identitas",
+  "Frekuensi",
+  "Penilaian Terminal",
+  "Kondisi",
+  "Transportasi Lanjutan",
+  "Petugas",
+  "Saran",
+];
+
+function formatAnswer(answer: unknown): string {
+  if (answer === undefined || answer === null || answer === "") return "Belum diisi";
+  if (Array.isArray(answer)) return answer.join(", ");
+  if (typeof answer === "object") return JSON.stringify(answer, null, 2);
+  return String(answer);
+}
+
+function Stepper({ steps, currentIndex, progress }: { steps: string[]; currentIndex: number; progress: number }) {
+  return (
+    <div className="rounded-3xl border border-white/60 bg-white/80 px-5 py-4 shadow-sm">
+      <div className="hidden gap-4 md:grid" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
+        {steps.map((label, index) => {
+          const state = index < currentIndex ? "done" : index === currentIndex ? "active" : "todo";
+          return (
+            <div key={label} className="flex flex-col items-center text-center">
+              <span
+                className={cn(
+                  "flex h-11 w-11 items-center justify-center rounded-full border-2 text-sm font-semibold transition",
+                  state === "done" && "border-emerald-400 bg-emerald-50 text-emerald-700",
+                  state === "active" && "border-sky-500 bg-sky-100 text-sky-700",
+                  state === "todo" && "border-slate-200 bg-white text-slate-400"
+                )}
+              >
+                {index + 1}
+              </span>
+              <span className="mt-2 text-sm font-medium text-slate-600">{label}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center justify-between md:hidden">
+        <div className="text-sm font-semibold text-slate-700">Langkah {currentIndex + 1}/{steps.length}</div>
+        <div className="text-xs text-slate-500">~3 menit lagi</div>
+      </div>
+      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+        <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  );
+}
+
 export default function SurveyRun() {
-  const { survey, flash } = usePage<PageProps>().props;
+  const { survey, flash, session } = usePage<PageProps>().props;
+  const [pageNo, setPageNo] = useState(0);
+  const [mode, setMode] = useState<Mode>("form");
+  const [questionTitle, setQuestionTitle] = useState<string>(survey.title);
+  const [questionDesc, setQuestionDesc] = useState<string | null>(null);
+  const [reviewData, setReviewData] = useState<Record<string, unknown>>({});
+  const [sessionToken, setSessionToken] = useState<string | null>(session?.token ?? null);
+  const [sessionStatus, setSessionStatus] = useState<"idle" | "saving" | "saved" | "error">(session?.token ? "saved" : "idle");
+  const [resumeUrl, setResumeUrl] = useState<string | null>(session?.resume_url ?? null);
+  const autosaveTimer = useRef<number | null>(null);
+  const allowCompletionRef = useRef(false);
+  const surveyRef = useRef<HTMLDivElement | null>(null);
+
+
+  const applySurveyStyles = useCallback((root?: HTMLElement | null) => {
+    const host = root ?? surveyRef.current;
+    if (!host) return;
+
+    const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+    const primary = isDark ? "#E2E8F0" : "#0F172A";
+    const secondary = isDark ? "rgba(203,213,225,0.82)" : "#475569";
+    const sectionBorder = isDark ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.24)";
+    const fieldBg = isDark ? "rgba(15,23,42,0.72)" : "#FFFFFF";
+    const fieldBorder = isDark ? "rgba(148,163,184,0.5)" : "rgba(148,163,184,0.45)";
+    const itemBg = isDark ? "rgba(30,41,59,0.45)" : "rgba(148,163,184,0.12)";
+    const itemBgActive = isDark ? "rgba(59,163,244,0.28)" : "rgba(29,127,209,0.16)";
+    const ratingAccent = isDark ? "#3BA3F4" : "#1D7FD1";
+    const ratingText = isDark ? "#0B1120" : "#FFFFFF";
+    const checkMark = isDark ? "#0B1120" : "#FFFFFF";
+
+    const textSelectors = [
+      ".sd-question__title",
+      ".sd-panel__title",
+      ".sd-element__title",
+      ".sd-description",
+      ".sd-question__description",
+      ".sd-selectbase__label",
+      ".sd-selectbase__item",
+      ".sd-item__text",
+      ".sd-checkbox__label",
+      ".sd-radio__label",
+      ".sd-checkbox__caption",
+      ".sd-radio__caption",
+      ".sd-html",
+      ".sv-string-viewer",
+      ".sd-title__text",
+      ".sd-body__navigation-title",
+      "label",
+      "span"
+    ];
+
+    textSelectors.forEach((selector) => {
+      host.querySelectorAll<HTMLElement>(selector).forEach((node) => {
+        node.style.setProperty("color", primary, "important");
+        node.style.removeProperty("opacity");
+      });
+    });
+
+    host
+      .querySelectorAll<HTMLElement>(".sd-description, .sd-question__description, .sd-panel__description")
+      .forEach((node) => {
+        node.style.setProperty("color", secondary, "important");
+      });
+
+    host
+      .querySelectorAll<HTMLElement>(".sd-body, .sd-row, .sd-row__question, .sd-page, .sd-panel, .sd-panel__content")
+      .forEach((node) => {
+        node.style.setProperty("background", "transparent", "important");
+        node.style.setProperty("border", "0", "important");
+        node.style.setProperty("box-shadow", "none", "important");
+        node.style.setProperty("padding", "0", "important");
+        node.style.removeProperty("opacity");
+      });
+
+    host.querySelectorAll<HTMLElement>(".sd-row").forEach((node) => {
+      node.style.setProperty("display", "flex", "important");
+      node.style.setProperty("flex-direction", "column", "important");
+      node.style.setProperty("gap", "28px", "important");
+      node.style.setProperty("margin", "0", "important");
+    });
+
+    const questions = Array.from(host.querySelectorAll<HTMLElement>(".sd-question"));
+    questions.forEach((node, index) => {
+      const isLast = index === questions.length - 1;
+      node.style.setProperty("background", "transparent", "important");
+      node.style.setProperty("border", "0", "important");
+      node.style.setProperty("border-left", "0", "important");
+      node.style.setProperty("box-shadow", "none", "important");
+      node.style.setProperty("padding", "0", "important");
+      node.style.setProperty("margin", "0", "important");
+      node.style.setProperty("border-bottom", isLast ? "none" : `1px solid ${sectionBorder}`, "important");
+      node.style.setProperty("padding-bottom", isLast ? "0" : "28px", "important");
+    });
+
+    host.querySelectorAll<HTMLElement>(".sd-question__header").forEach((node) => {
+      node.style.setProperty("margin-bottom", "16px", "important");
+    });
+
+    host
+      .querySelectorAll<HTMLElement>("input, textarea, select, .sd-input, .sd-text, .sd-comment, .sd-selectbase, .sd-html input, .sd-html textarea")
+      .forEach((node) => {
+        node.style.setProperty("color", primary, "important");
+        node.style.setProperty("background-color", fieldBg, "important");
+        node.style.setProperty("border-color", fieldBorder, "important");
+        node.style.removeProperty("opacity");
+      });
+
+    host.querySelectorAll<HTMLElement>(".sd-selectbase__item").forEach((node) => {
+      const isChecked = node.classList.contains("sd-selectbase__item--checked");
+      const isCheckbox = node.querySelector(".sd-checkbox__label") !== null;
+      const optionBg = isChecked
+        ? isCheckbox
+          ? ratingAccent
+          : itemBgActive
+        : isCheckbox
+        ? fieldBg
+        : itemBg;
+
+      node.style.setProperty("display", "flex", "important");
+      node.style.setProperty("align-items", "center", "important");
+      node.style.setProperty("gap", "12px", "important");
+      node.style.setProperty("border-radius", "16px", "important");
+      node.style.setProperty("padding", "12px 16px", "important");
+      node.style.setProperty("background-color", optionBg, "important");
+      node.style.setProperty("border", `1px solid ${isChecked ? ratingAccent : fieldBorder}`, "important");
+      node.style.setProperty("transition", "background-color .18s ease, border-color .18s ease", "important");
+      node.style.removeProperty("opacity");
+
+      const labelColor = isChecked && isCheckbox ? ratingText : primary;
+      node
+        .querySelectorAll<HTMLElement>(".sd-item__text, .sd-checkbox__label, .sd-radio__label")
+        .forEach((label) => label.style.setProperty("color", labelColor, "important"));
+
+      const control = node.querySelector<HTMLElement>(".sd-item__control");
+      if (control) {
+        const controlSize = isCheckbox ? "20px" : "18px";
+        control.style.setProperty("width", controlSize, "important");
+        control.style.setProperty("height", controlSize, "important");
+        control.style.setProperty("min-width", controlSize, "important");
+        control.style.setProperty("min-height", controlSize, "important");
+        control.style.setProperty("border-radius", isCheckbox ? "6px" : "999px", "important");
+        control.style.setProperty("border", `2px solid ${isChecked ? ratingAccent : fieldBorder}`, "important");
+        control.style.setProperty(
+          "background-color",
+          isChecked ? (isCheckbox ? ratingAccent : itemBgActive) : fieldBg,
+          "important"
+        );
+        control.style.setProperty("display", "inline-flex", "important");
+        control.style.setProperty("align-items", "center", "important");
+        control.style.setProperty("justify-content", "center", "important");
+        control.style.setProperty("box-shadow", "none", "important");
+        control.style.setProperty("transition", "all .18s ease", "important");
+
+        control
+          .querySelectorAll<HTMLElement>("svg, path, use, line, polyline")
+          .forEach((icon) => {
+            icon.style.setProperty("stroke", isChecked ? (isCheckbox ? checkMark : ratingText) : "transparent", "important");
+            icon.style.setProperty("fill", "none", "important");
+          });
+      }
+    });
+
+    host.querySelectorAll<HTMLElement>(".sv-rating__item").forEach((node) => {
+      const isSelected = node.classList.contains("sv-rating__item--selected");
+      node.style.setProperty("background-color", isSelected ? ratingAccent : itemBg, "important");
+      node.style.setProperty("border-color", isSelected ? ratingAccent : fieldBorder, "important");
+      node.style.setProperty("color", isSelected ? ratingText : primary, "important");
+      node.style.setProperty("box-shadow", "none", "important");
+      node.style.setProperty("border-radius", "999px", "important");
+    });
+
+    host.querySelectorAll<HTMLElement>(".sv-rating__item-text").forEach((node) => {
+      node.style.setProperty("color", secondary, "important");
+      node.style.removeProperty("opacity");
+    });
+  }, []);
+
+
 
   const model = useMemo(() => {
     const m = new Model({
@@ -25,137 +262,351 @@ export default function SurveyRun() {
     });
     m.locale = "id";
     m.showTitle = false;
-    // Hide built-in Next/Prev since we have a sticky navbar below
-    // @ts-ignore - string union supported by SurveyJS ('none'|'top'|'bottom'|'both')
-    (m as any).showNavigationButtons = 'none';
+    m.requiredText = "*";
+    m.focusFirstQuestionAutomatic = false;
+    m.questionErrorLocation = "bottom";
+    (m as any).showNavigationButtons = "none";
     return m;
   }, [survey]);
 
-  const [pageNo, setPageNo] = useState(0);
-  const [pageCount, setPageCount] = useState(1);
-  const [qTitle, setQTitle] = useState<string>(survey.title);
-  const [qDesc, setQDesc] = useState<string | null>(null);
-  useEffect(() => {
-    setPageNo(model.currentPageNo);
-    setPageCount(model.visiblePageCount);
-    const computeHeader = () => {
-      const p: any = model.currentPage as any;
-      const questions: any[] = p?.questions ?? [];
-      // Ambil pertanyaan pertama yang terlihat sebagai judul/deskripsi layar
-      const first = questions.find((qq: any) => qq?.isVisible !== false) ?? questions[0];
-      const title = (first?.title || p?.title || survey.title) as string;
-      const desc = (first?.description || p?.description || '') as string;
-      setQTitle(title);
-      setQDesc(desc || null);
-    };
-    computeHeader();
+  const saveSessionProgress = useCallback(async () => {
+    setSessionStatus("saving");
+    try {
+      const response = await fetch(routeOr("run.session.store", survey.slug, `/s/${survey.slug}/session`), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "X-XSRF-TOKEN": getCsrfToken(),
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          token: sessionToken,
+          answers: model.data as Record<string, unknown>,
+          meta: { pageNo: model.currentPageNo },
+        }),
+      });
+      if (!response.ok) throw new Error(`Failed to save session: ${response.status}`);
+      const payload: { token: string; resume_url: string; expires_at?: string | null } = await response.json();
+      setSessionToken(payload.token);
+      setResumeUrl(payload.resume_url);
+      setSessionStatus("saved");
+    } catch (error) {
+      console.error(error);
+      setSessionStatus("error");
+    }
+  }, [model, sessionToken, survey.slug]);
 
-    const handler = () => {
-      setPageNo(model.currentPageNo);
-      setPageCount(model.visiblePageCount);
-      computeHeader();
-    };
-    model.onCurrentPageChanged.add(handler);
-    return () => model.onCurrentPageChanged.remove(handler);
+
+  const steps = useMemo(() => {
+    const visiblePages = model.visiblePages || [];
+    const labels = visiblePages.map((page, index) => {
+      const raw = (page as any).stepTitle || page.title || CANONICAL_STEP_TITLES[index];
+      const label = typeof raw === "string" && raw.trim() ? raw : `Langkah ${index + 1}`;
+      return label;
+    });
+    return [...labels, "Ringkasan"];
   }, [model]);
 
-  const canPrev = pageNo > 0;
-  const isLast = pageNo === pageCount - 1;
-  const surveyRef = useRef<HTMLDivElement | null>(null);
-
-  // Smooth scroll to top on page change (respect reduced motion)
   useEffect(() => {
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
-    // Move focus to the survey region for assistive tech
-    surveyRef.current?.focus();
-  }, [pageNo]);
+    applySurveyStyles();
+  }, [applySurveyStyles]);
 
-  // Keyboard navigation
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        if (isLast) model.doComplete(); else model.nextPage();
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        if (canPrev) model.prevPage();
-      } else if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (isLast) model.doComplete(); else model.nextPage();
+    if (!session?.answers) return;
+    const initial = session.answers as Record<string, unknown>;
+    if (initial && Object.keys(initial).length) {
+      model.data = initial;
+    }
+  }, [model, session]);
+
+  useEffect(() => {
+    const valueHandler = () => applySurveyStyles();
+    model.onValueChanged.add(valueHandler);
+    return () => {
+      model.onValueChanged.remove(valueHandler);
+    };
+  }, [model, applySurveyStyles]);
+  const updatePageMeta = () => {
+    const currentPage = model.currentPage;
+    if (!currentPage) return;
+    const firstVisibleQuestion = (currentPage.questions || []).find((q: Question) => q.isVisible !== false) as Question | undefined;
+    const title = (firstVisibleQuestion?.title || currentPage.title || survey.title) as string;
+    const desc = (firstVisibleQuestion?.description || currentPage.description || "") as string;
+    setQuestionTitle(title);
+    setQuestionDesc(desc || null);
+    setPageNo(model.currentPageNo);
+    applySurveyStyles();
+  };
+
+  useEffect(() => {
+    updatePageMeta();
+    const onPageChanged = () => {
+      setMode("form");
+      updatePageMeta();
+    };
+    model.onCurrentPageChanged.add(onPageChanged);
+    return () => model.onCurrentPageChanged.remove(onPageChanged);
+  }, [model]);
+
+  useEffect(() => {
+    const handleCompleting = (sender: Model, options: any) => {
+      if (!allowCompletionRef.current) {
+        options.allowComplete = false;
+        setReviewData(sender.data as Record<string, unknown>);
+        setMode("review");
+      } else {
+        allowCompletionRef.current = false;
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [model, isLast, canPrev]);
-
-  useEffect(() => {
-    const handler = async (_sender: any, opt: any) => {
-      const form = new FormData();
-      for (const file of opt.files) form.append("files[]", file);
-      const res = await fetch(routeOr('upload.store', undefined, '/upload'), {
-        method: 'POST',
-        body: form,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      });
-      const data: { urls: string[] } = await res.json();
-      opt.callback('success', data.urls.map((url) => ({ file: { name: url, content: url } })));
-    };
-    model.onUploadFiles.add(handler);
-    return () => { model.onUploadFiles.remove(handler); };
+    model.onCompleting.add(handleCompleting);
+    return () => model.onCompleting.remove(handleCompleting);
   }, [model]);
 
+  useEffect(() => {
+    if (mode !== "form") return;
+    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    surveyRef.current?.focus();
+  }, [pageNo, mode]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (mode !== "form") return;
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        model.isLastPage ? model.doComplete() : model.nextPage();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        if (model.currentPageNo > 0) model.prevPage();
+      } else if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        model.isLastPage ? model.doComplete() : model.nextPage();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [model, mode]);
+  useEffect(() => {
+    const trigger = () => {
+      if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+      autosaveTimer.current = window.setTimeout(() => {
+        saveSessionProgress();
+      }, 1200);
+    };
+    model.onValueChanged.add(trigger);
+    model.onCurrentPageChanged.add(trigger);
+    return () => {
+      if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+      model.onValueChanged.remove(trigger);
+      model.onCurrentPageChanged.remove(trigger);
+    };
+  }, [model, saveSessionProgress]);
+
+  useEffect(() => {
+    if (sessionStatus !== "saved") return;
+    const timer = window.setTimeout(() => setSessionStatus("idle"), 4000);
+    return () => window.clearTimeout(timer);
+  }, [sessionStatus]);
+
+  const handleEditSection = (index: number) => {
+    model.currentPageNo = index;
+    setMode("form");
+    updatePageMeta();
+  };
+
+  const handlePrev = () => {
+    if (mode === "review") {
+      setMode("form");
+      model.currentPageNo = Math.max(model.visiblePageCount - 1, 0);
+      updatePageMeta();
+      return;
+    }
+    if (model.currentPageNo > 0) model.prevPage();
+  };
+
+  const handleNext = () => {
+    if (mode === "review") return;
+    if (model.isLastPage) {
+      model.doComplete();
+    } else {
+      model.nextPage();
+    }
+  };
+
+  const handleSubmit = () => {
+    allowCompletionRef.current = true;
+    model.doComplete();
+  };
+
+  const progressSteps = steps.length - 1 || 1;
+  const currentStepIndex = mode === "review" ? steps.length - 1 : Math.min(pageNo, steps.length - 1);
+  const progressPercent = Math.round((currentStepIndex / progressSteps) * 100);
+
+  const sections = useMemo(() => {
+    return model.visiblePages.map((page, index) => {
+      const questions = (page.questions || []).map((question: Question) => {
+        const name = question.name as string;
+        const title = (question.title || question.fullTitle || name) as string;
+        const value = (question.displayValue ?? reviewData?.[name]) as unknown;
+        return { name, title, value: formatAnswer(value) };
+      });
+      return {
+        index,
+        title: steps[index] || page.title || `Bagian ${index + 1}`,
+        questions,
+      };
+    });
+  }, [model, reviewData, steps]);
+
+  const canGoBack = mode === "review" || model.currentPageNo > 0;
+  const nextLabel = mode === "review" ? "Kirim Jawaban" : model.isLastPage ? "Lihat Ringkasan" : "Lanjut";
+
   const onComplete = (s: Model) => {
-    router.post(routeOr("run.submit", survey.slug, `/run/${survey.slug}`), {
+    router.post(routeOr("run.submit", survey.slug, `/s/${survey.slug}`), {
       answers: s.data,
-      meta: { finishedAt: new Date().toISOString() }
+      meta: { finishedAt: new Date().toISOString() },
+      session_token: sessionToken,
     });
   };
 
   return (
-    <div className="min-h-screen bg-snow grid place-items-center p-4">
+    <div className="survey-run-surface min-h-screen bg-slate-50">
       <Head title={survey.title} />
-      <div className="w-full max-w-2xl">
-        {flash?.ok && (
-          <Alert className="mb-4">
-            <AlertDescription>{flash.ok}</AlertDescription>
-          </Alert>
-        )}
-        <StepperProgress current={pageNo + 1} total={pageCount} />
-        <FrostCard className="mt-4">
-          <h1 className="text-2xl md:text-3xl font-semibold text-slate-700">{qTitle}</h1>
-          {qDesc && <p className="mt-2 text-slate-600">{qDesc}</p>}
-          <div className="mt-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={pageNo}
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-              >
-                <div ref={surveyRef} tabIndex={-1} aria-label="Area formulir survei" className="outline-none focus-visible:ring-2 focus-visible:ring-ring/60 rounded">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col">
+        <div className="flex-1 px-4 pb-28 pt-6 md:px-6 md:pt-10">
+          {flash?.ok && (
+            <Alert className="mb-4">
+              <AlertDescription>{flash.ok}</AlertDescription>
+            </Alert>
+          )}
+
+          <Stepper steps={steps} currentIndex={currentStepIndex} progress={progressPercent} />
+
+          {mode === "form" ? (
+            <FrostCard padded={false} className="survey-run-card mt-6 overflow-hidden">
+              <div className="border-b border-white/70 bg-white/80 px-6 py-5">
+                <div className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  {steps[pageNo] ?? `Langkah ${pageNo + 1}`}
+                </div>
+                <h1 className="mt-2 text-2xl font-semibold text-slate-800 md:text-3xl"></h1>
+                {questionDesc && <p className="mt-2 text-sm text-slate-500 md:text-base">{questionDesc}</p>}
+              </div>
+              <div className="survey-form-body px-4 py-6 md:px-8 md:py-8">
+                <div
+                  ref={surveyRef}
+                  tabIndex={-1}
+                  aria-label="Area formulir survei"
+                  className="survey-form-shell outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+                >
                   <Survey model={model} onComplete={onComplete} />
                 </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <div className="mt-8 flex justify-between">
-            <FrostButton variant="ghost" onClick={() => model.prevPage()} disabled={!canPrev} aria-label="Kembali">
-              <ChevronLeft className="mr-1 h-4 w-4" aria-hidden /> Kembali
-            </FrostButton>
-            {isLast ? (
-              <FrostButton onClick={() => model.doComplete()} aria-label="Kirim jawaban survei">
-                <SendHorizonal className="mr-1 h-4 w-4" aria-hidden /> Kirim
+              </div>
+            </FrostCard>
+          ) : (
+            <FrostCard padded={false} className="survey-run-card mt-6 space-y-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Langkah {steps.length} - Ringkasan</p>
+                <h1 className="mt-2 text-2xl font-semibold text-slate-800 md:text-3xl">Tinjau jawaban Anda</h1>
+                <p className="mt-2 text-sm text-slate-500 md:text-base">
+                  Pastikan setiap informasi sudah sesuai. Anda bisa kembali mengubah bagian tertentu sebelum mengirimkan jawaban.
+                </p>
+              </div>
+              <div className="space-y-5">
+                {sections.map((section) => (
+                  <div key={section.index} className="rounded-2xl border border-slate-200 bg-white/90 p-5">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                          {steps[section.index] ?? `Bagian ${section.index + 1}`}
+                        </div>
+                        <h2 className="mt-1 text-lg font-semibold text-slate-800">{section.title}</h2>
+                      </div>
+                      <FrostButton
+                        variant="ghost"
+                        className="self-start rounded-full px-4 text-sm"
+                        onClick={() => handleEditSection(section.index)}
+                      >
+                        <Edit3 className="mr-2 h-4 w-4" aria-hidden />
+                        Edit
+                      </FrostButton>
+                    </div>
+                    <dl className="mt-4 space-y-3">
+                      {section.questions.map((question) => (
+                        <div key={question.name} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                          <dt className="text-sm font-semibold text-slate-800">{question.title}</dt>
+                          <dd className="mt-3 text-base text-slate-900">{question.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ))}
+              </div>
+            </FrostCard>
+          )}
+        </div>
+
+        <div className="sticky bottom-0 border-t border-slate-200 bg-white/95 px-4 py-4 shadow-2xl shadow-slate-900/5 backdrop-blur md:px-6">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex flex-col gap-2 md:w-64">
+              <div className="flex items-center justify-between text-sm text-slate-600">
+                <span>Kemajuan</span>
+                <span>{progressPercent}%</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${progressPercent}%` }} />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 text-xs text-slate-500 md:w-72">
+              {resumeUrl ? (<><span className="font-medium text-slate-600">Link lanjutan tersedia</span><a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="truncate text-sky-600 underline">{resumeUrl}</a></>) : (
+                <span>{sessionStatus === "saving" ? "Menyimpan progres..." : sessionStatus === "error" ? "Gagal menyimpan progres. Coba lagi." : sessionStatus === "saved" ? "Progres tersimpan." : "Progres belum disimpan."}</span>
+              )}
+            </div>
+            <div className="flex flex-col gap-3 md:flex-row">
+              <FrostButton
+                onClick={saveSessionProgress}
+                className="h-12 rounded-full px-6 text-sm font-semibold"
+                disabled={sessionStatus === "saving"}
+              >
+                {sessionStatus === "saving" ? "Menyimpan..." : "Simpan & lanjut nanti"}
               </FrostButton>
-            ) : (
-              <FrostButton onClick={() => model.nextPage()} aria-label="Lanjut ke halaman berikutnya">
-                Lanjut <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
+              <FrostButton
+                variant="ghost"
+                className="h-12 rounded-full px-6 text-sm font-semibold"
+                onClick={handlePrev}
+                disabled={!canGoBack}
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" aria-hidden />
+                Kembali
               </FrostButton>
-            )}
+              {mode === "review" ? (
+                <FrostButton className="h-12 rounded-full px-8 text-sm font-semibold" onClick={handleSubmit}>
+                  <SendHorizontal className="mr-2 h-4 w-4" aria-hidden />
+                  Kirim Jawaban
+                </FrostButton>
+              ) : (
+                <FrostButton className="h-12 rounded-full px-8 text-sm font-semibold" onClick={handleNext}>
+                  {nextLabel}
+                  {model.isLastPage ? <SendHorizontal className="ml-2 h-4 w-4" aria-hidden /> : <ChevronRight className="ml-2 h-4 w-4" aria-hidden />}
+                </FrostButton>
+              )}
+            </div>
           </div>
-        </FrostCard>
+        </div>
       </div>
     </div>
   );
 }
+
+function getCsrfToken() {
+  const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+
+
+
+
+
+
