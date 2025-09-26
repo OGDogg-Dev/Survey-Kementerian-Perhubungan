@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChevronLeft, ChevronRight, Edit3, SendHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
+
 type SurveySessionDTO = {
   token: string;
   answers: Record<string, unknown> | null;
@@ -24,15 +26,10 @@ type PageProps = {
 
 type Mode = "form" | "review";
 
-const CANONICAL_STEP_TITLES = [
-  "Identitas",
-  "Frekuensi",
-  "Penilaian Terminal",
-  "Kondisi",
-  "Transportasi Lanjutan",
-  "Petugas",
-  "Saran",
-];
+/**
+ * Removed hardcoded CANONICAL_STEP_TITLES to make step titles fully dynamic from survey schema.
+ * If a page has no title or stepTitle, fallback to "Langkah {index + 1}".
+ */
 
 function formatAnswer(answer: unknown): string {
   if (answer === undefined || answer === null || answer === "") return "Belum diisi";
@@ -105,6 +102,19 @@ export default function SurveyRun() {
     const ratingAccent = isDark ? "#3BA3F4" : "#1D7FD1";
     const ratingText = isDark ? "#0B1120" : "#FFFFFF";
     const checkMark = isDark ? "#0B1120" : "#FFFFFF";
+    const questionGlassBg = isDark
+      ? "linear-gradient(150deg, rgba(22,33,55,0.82), rgba(9,17,31,0.68))"
+      : "linear-gradient(150deg, rgba(255,255,255,0.88), rgba(237,244,255,0.62))";
+    const questionGlassOverlay = isDark ? "rgba(17,27,45,0.58)" : "rgba(255,255,255,0.45)";
+    const questionGlassBorder = fieldBorder;
+    const questionGlassShadow = isDark
+      ? "0 28px 70px rgba(2,8,23,0.5), 0 14px 30px rgba(15,23,42,0.3)"
+      : "0 26px 56px rgba(15,23,42,0.14), 0 12px 24px rgba(37,99,235,0.12)";
+    const questionGlassBackdrop = "blur(24px) saturate(180%)";
+    const highlightBg = isDark ? "rgba(250,204,21,0.28)" : "rgba(250,204,21,0.18)";
+    const highlightBorder = isDark ? "rgba(250,204,21,0.72)" : "rgba(234,179,8,0.75)";
+    const highlightSolid = "#FACC15";
+    const highlightText = "#0B1120";
 
     const textSelectors = [
       ".sd-question__title",
@@ -157,22 +167,55 @@ export default function SurveyRun() {
       node.style.setProperty("margin", "0", "important");
     });
 
-    const questions = Array.from(host.querySelectorAll<HTMLElement>(".sd-question"));
+    const enforceQuestionTone = () => {
+      host.querySelectorAll<HTMLElement>(".sd-question, .sd-element, .sv_q").forEach((node) => {
+        node.style.setProperty("color", primary, "important");
+        node.style.setProperty("--sjs-general-forecolor", primary, "important");
+        node.style.setProperty("--sjs-questiontitle-forecolor", primary, "important");
+        node.style.setProperty("--sjs-answer-foreground-color", primary, "important");
+        node.style.removeProperty("opacity");
+        node
+          .querySelectorAll<HTMLElement>(".sd-question__title, .sd-panel__title, .sd-element__title, .sd-title__text, .sv-string-viewer, .sd-html, .sd-description, .sd-question__description, .sd-item__text, label")
+          .forEach((el) => {
+            el.style.setProperty("color", primary, "important");
+            el.style.removeProperty("opacity");
+          });
+      });
+    };
+
+    const questions = Array.from(host.querySelectorAll<HTMLElement>(".sd-question, .sd-element, .sv_q"));
     questions.forEach((node, index) => {
-      const isLast = index === questions.length - 1;
-      node.style.setProperty("background", "transparent", "important");
-      node.style.setProperty("border", "0", "important");
-      node.style.setProperty("border-left", "0", "important");
-      node.style.setProperty("box-shadow", "none", "important");
-      node.style.setProperty("padding", "0", "important");
-      node.style.setProperty("margin", "0", "important");
-      node.style.setProperty("border-bottom", isLast ? "none" : `1px solid ${sectionBorder}`, "important");
-      node.style.setProperty("padding-bottom", isLast ? "0" : "28px", "important");
+      node.style.setProperty("background", questionGlassBg, "important");
+      node.style.setProperty("background-color", questionGlassOverlay, "important");
+      node.style.setProperty("border", `1px solid ${questionGlassBorder}`, "important");
+      node.style.setProperty("box-shadow", questionGlassShadow, "important");
+      node.style.setProperty("padding", "24px 28px", "important");
+      node.style.setProperty("margin", index === 0 ? "18px 0 26px" : "28px 0 0", "important");
+      node.style.setProperty("border-radius", "22px", "important");
+      node.style.setProperty("overflow", "hidden", "important");
+      node.style.setProperty("position", "relative", "important");
+      node.style.setProperty("isolation", "isolate", "important");
+      node.style.setProperty("backdrop-filter", questionGlassBackdrop, "important");
+      node.style.setProperty("-webkit-backdrop-filter", questionGlassBackdrop, "important");
+      node.style.setProperty("border-bottom", "none", "important");
+      node.style.removeProperty("opacity");
     });
+
+    enforceQuestionTone();
+    if (typeof window !== "undefined") {
+      window.setTimeout(enforceQuestionTone, 30);
+      window.setTimeout(enforceQuestionTone, 130);
+    }
 
     host.querySelectorAll<HTMLElement>(".sd-question__header").forEach((node) => {
       node.style.setProperty("margin-bottom", "16px", "important");
     });
+
+    host
+      .querySelectorAll<HTMLElement>(".sv-components-column.sv-components-column--expandable")
+      .forEach((node) => {
+        node.style.setProperty("background-color", "#FFFFFF", "important");
+      });
 
     host
       .querySelectorAll<HTMLElement>("input, textarea, select, .sd-input, .sd-text, .sd-comment, .sd-selectbase, .sd-html input, .sd-html textarea")
@@ -183,52 +226,48 @@ export default function SurveyRun() {
         node.style.removeProperty("opacity");
       });
 
-    host.querySelectorAll<HTMLElement>(".sd-selectbase__item").forEach((node) => {
+    host.querySelectorAll<HTMLElement>(".sd-selectbase__item").forEach((node, index) => {
       const isChecked = node.classList.contains("sd-selectbase__item--checked");
       const isCheckbox = node.querySelector(".sd-checkbox__label") !== null;
-      const optionBg = isChecked
-        ? isCheckbox
-          ? ratingAccent
-          : itemBgActive
-        : isCheckbox
-        ? fieldBg
-        : itemBg;
-
+      const baseBg = fieldBg;
+      const baseBorder = fieldBorder;
+      const activeBg = isCheckbox
+        ? isDark
+          ? "rgba(59,130,246,0.24)"
+          : "rgba(37,99,235,0.08)"
+        : isDark
+        ? "rgba(30,64,175,0.28)"
+        : "rgba(226,232,240,0.6)";
+      const activeBorder = ratingAccent;
       node.style.setProperty("display", "flex", "important");
-      node.style.setProperty("align-items", "center", "important");
-      node.style.setProperty("gap", "12px", "important");
-      node.style.setProperty("border-radius", "16px", "important");
-      node.style.setProperty("padding", "12px 16px", "important");
-      node.style.setProperty("background-color", optionBg, "important");
-      node.style.setProperty("border", `1px solid ${isChecked ? ratingAccent : fieldBorder}`, "important");
-      node.style.setProperty("transition", "background-color .18s ease, border-color .18s ease", "important");
+      node.style.setProperty("align-items", "flex-start", "important");
+      node.style.setProperty("gap", "10px", "important");
+      node.style.setProperty("border-radius", "10px", "important");
+      node.style.setProperty("padding", "10px 14px", "important");
+      node.style.setProperty("margin", index === 0 ? "14px 18px 12px" : "12px 18px", "important");
+      node.style.setProperty("background-color", isChecked ? activeBg : baseBg, "important");
+      node.style.setProperty("border", `1px solid ${isChecked ? activeBorder : baseBorder}`, "important");
+      node.style.setProperty("box-shadow", "none", "important");
+      node.style.setProperty("transition", "background-color .15s ease, border-color .15s ease", "important");
       node.style.removeProperty("opacity");
-
-      const labelColor = isChecked && isCheckbox ? ratingText : primary;
       node
         .querySelectorAll<HTMLElement>(".sd-item__text, .sd-checkbox__label, .sd-radio__label")
-        .forEach((label) => label.style.setProperty("color", labelColor, "important"));
-
+        .forEach((label) => label.style.setProperty("color", primary, "important"));
       const control = node.querySelector<HTMLElement>(".sd-item__control");
       if (control) {
-        const controlSize = isCheckbox ? "20px" : "18px";
+        const controlSize = isCheckbox ? "18px" : "16px";
         control.style.setProperty("width", controlSize, "important");
         control.style.setProperty("height", controlSize, "important");
         control.style.setProperty("min-width", controlSize, "important");
         control.style.setProperty("min-height", controlSize, "important");
-        control.style.setProperty("border-radius", isCheckbox ? "6px" : "999px", "important");
-        control.style.setProperty("border", `2px solid ${isChecked ? ratingAccent : fieldBorder}`, "important");
-        control.style.setProperty(
-          "background-color",
-          isChecked ? (isCheckbox ? ratingAccent : itemBgActive) : fieldBg,
-          "important"
-        );
+        control.style.setProperty("border-radius", isCheckbox ? "4px" : "999px", "important");
+        control.style.setProperty("border", `2px solid ${isChecked ? activeBorder : fieldBorder}`, "important");
+        control.style.setProperty("background-color", isChecked ? (isCheckbox ? activeBorder : activeBg) : baseBg, "important");
         control.style.setProperty("display", "inline-flex", "important");
         control.style.setProperty("align-items", "center", "important");
         control.style.setProperty("justify-content", "center", "important");
         control.style.setProperty("box-shadow", "none", "important");
-        control.style.setProperty("transition", "all .18s ease", "important");
-
+        control.style.setProperty("transition", "all .15s ease", "important");
         control
           .querySelectorAll<HTMLElement>("svg, path, use, line, polyline")
           .forEach((icon) => {
@@ -237,7 +276,6 @@ export default function SurveyRun() {
           });
       }
     });
-
     host.querySelectorAll<HTMLElement>(".sv-rating__item").forEach((node) => {
       const isSelected = node.classList.contains("sv-rating__item--selected");
       node.style.setProperty("background-color", isSelected ? ratingAccent : itemBg, "important");
@@ -302,7 +340,7 @@ export default function SurveyRun() {
   const steps = useMemo(() => {
     const visiblePages = model.visiblePages || [];
     const labels = visiblePages.map((page, index) => {
-      const raw = (page as any).stepTitle || page.title || CANONICAL_STEP_TITLES[index];
+      const raw = (page as any).stepTitle || page.title;
       const label = typeof raw === "string" && raw.trim() ? raw : `Langkah ${index + 1}`;
       return label;
     });
@@ -328,6 +366,30 @@ export default function SurveyRun() {
       model.onValueChanged.remove(valueHandler);
     };
   }, [model, applySurveyStyles]);
+  useEffect(() => {
+    const handleRender = (_: Model, options: any) => {
+      const target = (options?.htmlElement as HTMLElement | null) ?? null;
+      const run = () => applySurveyStyles(target);
+      if (typeof window !== 'undefined') {
+        if (typeof window.requestAnimationFrame === 'function') {
+          window.requestAnimationFrame(run);
+        } else {
+          window.setTimeout(run, 0);
+        }
+        window.setTimeout(run, 60);
+        window.setTimeout(run, 140);
+      } else {
+        run();
+      }
+    };
+    model.onAfterRenderPage.add(handleRender);
+    model.onAfterRenderQuestion.add(handleRender);
+    return () => {
+      model.onAfterRenderPage.remove(handleRender);
+      model.onAfterRenderQuestion.remove(handleRender);
+    };
+  }, [model, applySurveyStyles]);
+
   const updatePageMeta = () => {
     const currentPage = model.currentPage;
     if (!currentPage) return;
@@ -547,53 +609,61 @@ export default function SurveyRun() {
           )}
         </div>
 
-        <div className="sticky bottom-0 border-t border-slate-200 bg-white/95 px-4 py-4 shadow-2xl shadow-slate-900/5 backdrop-blur md:px-6">
-          <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div className="flex flex-col gap-2 md:w-64">
-              <div className="flex items-center justify-between text-sm text-slate-600">
-                <span>Kemajuan</span>
-                <span>{progressPercent}%</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${progressPercent}%` }} />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1 text-xs text-slate-500 md:w-72">
-              {resumeUrl ? (<><span className="font-medium text-slate-600">Link lanjutan tersedia</span><a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="truncate text-sky-600 underline">{resumeUrl}</a></>) : (
-                <span>{sessionStatus === "saving" ? "Menyimpan progres..." : sessionStatus === "error" ? "Gagal menyimpan progres. Coba lagi." : sessionStatus === "saved" ? "Progres tersimpan." : "Progres belum disimpan."}</span>
-              )}
-            </div>
-            <div className="flex flex-col gap-3 md:flex-row">
-              <FrostButton
-                onClick={saveSessionProgress}
-                className="h-12 rounded-full px-6 text-sm font-semibold"
-                disabled={sessionStatus === "saving"}
-              >
-                {sessionStatus === "saving" ? "Menyimpan..." : "Simpan & lanjut nanti"}
-              </FrostButton>
-              <FrostButton
-                variant="ghost"
-                className="h-12 rounded-full px-6 text-sm font-semibold"
-                onClick={handlePrev}
-                disabled={!canGoBack}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" aria-hidden />
-                Kembali
-              </FrostButton>
-              {mode === "review" ? (
-                <FrostButton className="h-12 rounded-full px-8 text-sm font-semibold" onClick={handleSubmit}>
-                  <SendHorizontal className="mr-2 h-4 w-4" aria-hidden />
-                  Kirim Jawaban
-                </FrostButton>
-              ) : (
-                <FrostButton className="h-12 rounded-full px-8 text-sm font-semibold" onClick={handleNext}>
-                  {nextLabel}
-                  {model.isLastPage ? <SendHorizontal className="ml-2 h-4 w-4" aria-hidden /> : <ChevronRight className="ml-2 h-4 w-4" aria-hidden />}
-                </FrostButton>
-              )}
-            </div>
-          </div>
-        </div>
+<div className="sticky bottom-0 border-t border-slate-200 bg-white/95 px-4 py-4 shadow-2xl shadow-slate-900/5 backdrop-blur md:px-6">
+  <div className="mx-auto w-full max-w-5xl flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    
+    {/* Progress (full width & fleksibel) */}
+    <div className="flex flex-col gap-2 order-1 flex-1 w-full">
+      <div className="flex items-center justify-between text-sm text-slate-600">
+        <span>Kemajuan</span>
+        <span>{progressPercent}%</span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+        <div
+          className="h-full rounded-full bg-sky-500 transition-all"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+    </div>
+
+    {/* Actions: responsif penuh */}
+    <div className="order-2 w-full grid grid-cols-2 gap-3 md:w-auto md:flex md:gap-3 md:flex-none">
+      <FrostButton
+        variant="ghost"
+        className="h-10 w-full rounded-full px-4 text-sm font-semibold md:w-auto"
+        onClick={handlePrev}
+        disabled={!canGoBack}
+      >
+        <ChevronLeft className="mr-2 h-4 w-4" aria-hidden />
+        Kembali
+      </FrostButton>
+
+      {mode === "review" ? (
+        <FrostButton
+          className="h-10 w-full rounded-full px-4 text-sm font-semibold md:w-auto"
+          onClick={handleSubmit}
+        >
+          <SendHorizontal className="mr-2 h-4 w-4" aria-hidden />
+          Kirim
+        </FrostButton>
+      ) : (
+        <FrostButton
+          className="h-10 w-full rounded-full px-4 text-sm font-semibold md:w-auto"
+          onClick={handleNext}
+        >
+          {nextLabel}
+          {model.isLastPage ? (
+            <SendHorizontal className="ml-2 h-4 w-4" aria-hidden />
+          ) : (
+            <ChevronRight className="ml-2 h-4 w-4" aria-hidden />
+          )}
+        </FrostButton>
+      )}
+    </div>
+  </div>
+</div>
+
+
       </div>
     </div>
   );

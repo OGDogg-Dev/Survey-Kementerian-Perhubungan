@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import AdminLayout from "@/layouts/AdminLayout";
 import type { BreadcrumbItem } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,80 +16,75 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Download } from "lucide-react";
 
-const chartBundle = Promise.all([import("react-chartjs-2"), import("chart.js/auto")]).then(([mod]) => mod);
-const Line = React.lazy(() => chartBundle.then((mod) => ({ default: mod.Line })));
-const Bar = React.lazy(() => chartBundle.then((mod) => ({ default: mod.Bar })));
-
-const trendData = {
-  labels: ["Mei", "Jun", "Jul", "Agu", "Sep"],
-  datasets: [
-    {
-      label: "IKM",
-      data: [82, 83, 84, 86, 88],
-      borderColor: "#1D7FD1",
-      backgroundColor: "rgba(59,163,244,0.1)",
-      tension: 0.35,
-      fill: true,
-    },
-  ],
+type ResponseItem = {
+  id: number;
+  name: string;
+  location: string;
+  submittedAt: string;
+  satisfaction: number | null;
+  feedback: string | null;
 };
 
-const dimensionData = {
-  labels: ["Kebersihan", "Keamanan", "Informasi", "Ketepatan", "Petugas"],
-  datasets: [
-    {
-      label: "Skor",
-      data: [4.1, 4.3, 3.9, 4.5, 4.0],
-      backgroundColor: "rgba(59,163,244,0.65)",
-      borderRadius: 12,
-      borderSkipped: false,
-      maxBarThickness: 48,
-    },
-  ],
+type PageProps = {
+  latestResponses: ResponseItem[];
+  metrics: {
+    averageSatisfaction: number | null;
+    positiveFeedbackShare: number | null;
+    totalResponses: number;
+    responsesLast7Days: number;
+    responsesLast30Days: number;
+    activeSurveys: number;
+  };
 };
 
-const topComplaints = [
-  { title: "Toilet kurang bersih", count: 124 },
-  { title: "Antrian loket panjang", count: 97 },
-  { title: "Informasi jadwal kurang jelas", count: 56 },
-];
-
-const responses = [
-  {
-    id: 1,
-    name: "Andi",
-    location: "Terminal Manggarai",
-    submittedAt: "2025-09-20",
-    satisfaction: 4.6,
-    feedback: "Perlu tambah petugas saat pagi.",
-  },
-  {
-    id: 2,
-    name: "Siti",
-    location: "Terminal Purabaya",
-    submittedAt: "2025-09-19",
-    satisfaction: 4.2,
-    feedback: "Toilet bersih tapi sabun habis.",
-  },
-  {
-    id: 3,
-    name: "Budi",
-    location: "Terminal Giwangan",
-    submittedAt: "2025-09-18",
-    satisfaction: 3.8,
-    feedback: "Informasi jadwal terlambat di-update.",
-  },
-  {
-    id: 4,
-    name: "Dewi",
-    location: "Terminal Tirtonadi",
-    submittedAt: "2025-09-17",
-    satisfaction: 4.9,
-    feedback: "Petugas ramah dan responsif.",
-  },
-];
+const chartBundle = Promise.all([import("react-chartjs-2"), import("chart.js/auto")]);
+const Line = React.lazy(() => chartBundle.then(([reactChartjs2]) => ({ default: reactChartjs2.Line as React.ComponentType<any> })));
+const Bar = React.lazy(() => chartBundle.then(([reactChartjs2]) => ({ default: reactChartjs2.Bar as React.ComponentType<any> })));
 
 export default function Dashboard() {
+  const { latestResponses, metrics } = usePage<PageProps>().props;
+
+  const topComplaints = React.useMemo(() => {
+    const feedbackCount: { [key: string]: number } = {};
+    latestResponses.forEach((response) => {
+      if (response.feedback) {
+        feedbackCount[response.feedback] = (feedbackCount[response.feedback] || 0) + 1;
+      }
+    });
+    return Object.entries(feedbackCount)
+      .map(([title, count]) => ({ title, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+  }, [latestResponses]);
+
+  const trendData = {
+    labels: ["Mei", "Jun", "Jul", "Agu", "Sep"],
+    datasets: [
+      {
+        label: "IKM",
+        data: Array(5).fill(metrics.averageSatisfaction || 0),
+        borderColor: "#1D7FD1",
+        backgroundColor: "rgba(59,163,244,0.1)",
+        tension: 0.35,
+        fill: true,
+      },
+    ],
+  };
+
+  const dimensionData = {
+    labels: ["Kebersihan", "Keamanan", "Informasi", "Ketepatan", "Petugas"],
+    datasets: [
+      {
+        label: "Skor",
+        data: Array(5).fill(metrics.averageSatisfaction || 0),
+        backgroundColor: "rgba(59,163,244,0.65)",
+        borderRadius: 12,
+        borderSkipped: false,
+        maxBarThickness: 48,
+      },
+    ],
+  };
+
   const breadcrumbs: BreadcrumbItem[] = [{ title: "Dashboard", href: "/dashboard" }];
 
   return (
@@ -103,7 +98,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-end gap-2">
-                <span className="text-4xl font-semibold text-slate-800">4,32</span>
+                <span className="text-4xl font-semibold text-slate-800">{metrics.averageSatisfaction?.toFixed(2).replace('.', ',') ?? 'N/A'}</span>
                 <Badge variant="secondary" className="rounded-full bg-emerald-100 text-emerald-700">
                   +0,18 vs bulan lalu
                 </Badge>
@@ -118,25 +113,25 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-semibold text-slate-800">1.284</span>
+                <span className="text-4xl font-semibold text-slate-800">{metrics.totalResponses}</span>
                 <span className="text-sm text-emerald-600">+12% minggu ini</span>
               </div>
               <p className="mt-2 text-sm text-slate-500">Rata-rata 180 respon per hari kerja.</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+          <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold tracking-wide text-slate-200">Top 3 Keluhan</CardTitle>
+              <CardTitle className="text-sm font-semibold text-slate-500">Top 3 Keluhan</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {topComplaints.map((item, index) => (
                 <div key={item.title} className="flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs uppercase tracking-wide text-slate-400">#{index + 1}</div>
-                    <p className="text-sm font-medium text-white">{item.title}</p>
+                    <p className="text-sm font-medium text-slate-800">{item.title}</p>
                   </div>
-                  <Badge variant="secondary" className="rounded-full bg-white/15 text-white">
+                  <Badge variant="secondary" className="rounded-full bg-green-100 text-green-800">
                     {item.count} laporan
                   </Badge>
                 </div>
@@ -271,12 +266,12 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {responses.map((row) => (
+                    {latestResponses.map((row) => (
                       <tr key={row.id} className="border-t border-slate-200/70 text-slate-700">
                         <td className="px-6 py-4 font-medium">{row.name}</td>
                         <td className="px-6 py-4">{row.location}</td>
                         <td className="px-6 py-4">{row.submittedAt}</td>
-                        <td className="px-6 py-4 font-semibold text-slate-800">{row.satisfaction.toFixed(1)}</td>
+                        <td className="px-6 py-4 font-semibold text-slate-800">{row.satisfaction?.toFixed(1) ?? 'N/A'}</td>
                         <td className="px-6 py-4 text-slate-500">{row.feedback}</td>
                       </tr>
                     ))}
@@ -285,12 +280,12 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-4 px-4 py-6 md:hidden">
-                {responses.map((row) => (
+                {latestResponses.map((row) => (
                   <div key={row.id} className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div className="text-base font-semibold text-slate-800">{row.name}</div>
                       <Badge variant="outline" className="rounded-full border-slate-300 text-slate-600">
-                        {row.satisfaction.toFixed(1)}
+                        {row.satisfaction?.toFixed(1) ?? 'N/A'}
                       </Badge>
                     </div>
                     <div className="mt-2 text-sm text-slate-500">{row.location}</div>

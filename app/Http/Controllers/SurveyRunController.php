@@ -62,7 +62,7 @@ class SurveyRunController extends Controller
         SurveyResponse::create([
             'survey_id' => $survey->id,
             'response_uuid' => Str::uuid(),
-            'user_id' => $request->user()?->id(),
+            'user_id' => $request->user()?->id,
             'answers_json' => $data['answers'],
             'meta_json' => $data['meta'] ?? [
                 'ip' => $request->ip(),

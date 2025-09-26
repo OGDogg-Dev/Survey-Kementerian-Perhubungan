@@ -101,7 +101,7 @@
 
   /* Accessible focus outline helper */
   .focus-ring:focus,
-  .focus-ring:focus-visible { outline:2px solid #3BA3F4; outline-offset:2px; }
+  .focus-ring:focus-visible { outline:2px solid #fffb00; outline-offset:2px; }
 
   /* Landing-like background surface applied globally */
   .surface-landing {
@@ -111,8 +111,10 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.73 0.22 320);
+    --primary: oklch(67.795% 0.1798 247.372);
     --primary-foreground: oklch(0.145 0 0);
+    --accent: oklch(67.795% 0.1798 247.372);
+    --accent-foreground: oklch(0.145 0 0);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
@@ -133,7 +135,7 @@
 
     background-color: var(--background);
     background-image:
-      radial-gradient(1000px 600px at 10% 10%, color-mix(in oklch, oklch(0.65 0.2 325), transparent 82%), transparent 60%),
+      radial-gradient(1000px 600px at 10% 10%, color-mix(in oklch, oklch(0.72 0.18 250), transparent 82%), transparent 60%),
       radial-gradient(800px 400px at 90% 20%, color-mix(in oklch, oklch(0.6 0.1 255), transparent 84%), transparent 60%),
       linear-gradient(135deg, color-mix(in oklch, var(--background), black 6%), color-mix(in oklch, var(--background), black 8%));
     background-attachment: fixed;
@@ -296,7 +298,7 @@
   html.dark .survey-run-card .sd-selectbase:focus { background-color: color-mix(in oklch, var(--background), white 12%) !important; }
 
   .survey-run-card input[type='checkbox'],
-  .survey-run-card input[type='radio'] { accent-color: oklch(0.7 0.12 250); }
+  .survey-run-card input[type='radio'] { accent-color: yellow; }
 
   .survey-run-card .sd-btn { background-color: var(--primary) !important; color: var(--primary-foreground) !important; border: 0 !important; border-radius: .5rem !important; }
   .survey-run-card .sd-btn:hover { filter: brightness(.95); }
@@ -362,20 +364,20 @@ html.dark .survey-form-body {
 }
 
 .survey-form-body .sd-question {
-  background: #ffffff !important;
-  border: 1px solid rgba(148,163,184,0.35) !important;
-  box-shadow: none !important;
-  color: #0f172a !important;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #0f172a;
 }
 html.dark .survey-form-body .sd-question {
-  background: rgba(15,23,42,0.78) !important;
-  border-color: rgba(148,163,184,0.45) !important;
-  color: rgba(226,232,240,0.95) !important;
+  background: transparent;
+  border-color: transparent;
+  color: rgba(226,232,240,0.95);
 }
 
 .survey-form-body .sd-question:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(15,23,42,0.14) !important;
+  box-shadow: none;
 }
 
 .survey-run-card .sd-question__title,
@@ -660,13 +662,13 @@ html.dark .survey-form-shell .sd-selectbase__item .sd-checkbox__control {
 }
 .survey-form-shell .sd-selectbase__item--checked .sd-checkbox .sd-item__control,
 .survey-form-shell .sd-selectbase__item--checked .sd-checkbox__control {
-  border-color: #1D7FD1 !important;
-  background: #1D7FD1 !important;
+  border-color: #ffff00 !important;
+  background: #ffff00 !important;
 }
 html.dark .survey-form-shell .sd-selectbase__item--checked .sd-checkbox .sd-item__control,
 html.dark .survey-form-shell .sd-selectbase__item--checked .sd-checkbox__control {
-  border-color: #3BA3F4 !important;
-  background: #3BA3F4 !important;
+  border-color: #ffff00 !important;
+  background: #ffff00 !important;
 }
 .survey-form-shell .sd-checkbox .sd-item__control svg,
 .survey-form-shell .sd-checkbox .sd-item__control path,

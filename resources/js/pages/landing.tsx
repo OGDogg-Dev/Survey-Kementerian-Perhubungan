@@ -1,9 +1,9 @@
-import { Head, Link, usePage } from "@inertiajs/react";
+﻿import { Head, Link, usePage } from "@inertiajs/react";
 import * as React from "react";
 import FrostButton from "@/components/FrostButton";
 import FrostCard from "@/components/FrostCard";
 import { routeOr } from "@/lib/route";
-import { ArrowRight, Clock, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, Clock, Mail, ShieldCheck, User } from "lucide-react";
 
 type SurveyLite = { id: number; title: string; slug: string };
 
@@ -17,7 +17,7 @@ function useFilteredSurveys<T extends SurveyLite>(surveys: T[] | undefined, quer
 }
 
 export default function LandingPage() {
-  const { surveys } = usePage<{ surveys?: SurveyLite[] }>().props;
+  const surveys = (usePage().props as Record<string, unknown>)?.surveys as SurveyLite[] | undefined;
   const primarySurvey = surveys?.[0];
   const [search, setSearch] = React.useState("");
 
@@ -35,17 +35,20 @@ export default function LandingPage() {
         <div className="mx-auto w-full max-w-6xl px-4">
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-3">
             <Link href={routeOr("home", undefined, "/")} className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Logo Kemenhub" className="h-10 w-auto" />
+            <img src="https://tirtosmartaccess.id/img/logo-5.png" alt="Logo Kemenhub" className="h-10 w-auto" />
+            <img src="https://tirtosmartaccess.id/img/logo-2.png" alt="Logo Kemenhub" className="h-10 w-auto" />
+              <img src="https://tirtosmartaccess.id/logo/page_view_1754240796.png" alt="Logo Kemenhub" className="h-10 w-auto" />
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 md:hidden">
-                Survei Terminal Kemenhub
+                Survei Kepuasan Masyarakat
               </span>
             </Link>
-            <div className="hidden justify-self-center text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 md:block">
-              Sistem Survei Terminal Nasional
-            </div>
+            
             <div className="justify-self-end">
-              <FrostButton asChild variant="secondary" className="h-10 rounded-full px-4 text-sm font-medium">
-                <Link href={loginHref}>Login Admin</Link>
+              <FrostButton asChild variant="secondary" className="h-10 rounded-full px-3 text-sm font-medium">
+                <Link href={loginHref} aria-label="Login Admin" className="flex items-center justify-center">
+                  <User className="h-5 w-5" aria-hidden />
+                  <span className="sr-only">Login Admin</span>
+                </Link>
               </FrostButton>
             </div>
           </div>
@@ -65,7 +68,7 @@ export default function LandingPage() {
                     Program Pelayanan Publik Kemenhub
                   </span>
                   <h1 className="text-balance text-3xl font-bold leading-tight text-slate-900 md:text-5xl">
-                    Survei Kepuasan Terminal
+                    Survei Kepuasan Masyarakat
                   </h1>
                   <p className="max-w-xl text-base text-slate-600 md:text-lg">
                     Sampaikan pengalaman Anda menggunakan terminal dan layanan transportasi. Suara Anda membantu kami
@@ -184,9 +187,9 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-col gap-2 md:text-right">
             <a href="mailto:survei@dephub.go.id" className="inline-flex items-center gap-2 text-slate-600 hover:text-sky-600">
-              <Mail className="h-4 w-4" aria-hidden /> survei@dephub.go.id
+              <Mail className="h-4 w-4" aria-hidden /> survei@kemenhub.go.id
             </a>
-            <p>Jl. Medan Merdeka Barat No. 8, Jakarta Pusat</p>
+            <p>Terminal Tirtonadi</p>
             <p className="text-xs text-slate-400">&copy; {new Date().getFullYear()} Direktorat Jenderal Perhubungan Darat</p>
           </div>
         </div>
@@ -194,3 +197,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
+

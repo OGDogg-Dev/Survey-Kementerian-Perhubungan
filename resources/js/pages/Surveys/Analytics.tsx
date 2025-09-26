@@ -1,10 +1,12 @@
 import { Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { Suspense } from "react";
 import { routeOr } from "@/lib/route";
 import type { BreadcrumbItem } from "@/types";
+import { Download, Printer } from "lucide-react";
 
 type AnalyticsData = {
   counts: Record<string, number>;
@@ -12,12 +14,20 @@ type AnalyticsData = {
   title?: string;
 };
 
+type AnalyticsStats = {
+  totalResponses: number;
+  totalQuestions: number;
+  totalAnswered: number;
+  completionRate: number;
+};
+
 type Props = {
   survey: { id: number; title: string };
   analytics: Record<string, AnalyticsData>;
+  stats?: AnalyticsStats;
 };
 
-export default function Analytics({ survey, analytics }: Props) {
+export default function Analytics({ survey, analytics, stats }: Props) {
   const BarLazy = React.lazy(() =>
     Promise.all([import("react-chartjs-2"), import("chart.js/auto")]).then(([mod]) => ({
       default: mod.Bar,
@@ -32,9 +42,13 @@ export default function Analytics({ survey, analytics }: Props) {
   const totals = Object.values(analytics).map((d) =>
     Object.values(d.counts).reduce((a, b) => a + b, 0)
   );
-  const totalResponses = totals.length ? Math.max(...totals) : 0;
-  const minResponses = totals.length ? Math.min(...totals) : 0;
-  const completionRate = totalResponses > 0 ? Math.round((minResponses / totalResponses) * 100) : 0;
+  const fallbackTotalResponses = totals.length ? Math.max(...totals) : 0;
+  const fallbackCompletionRate = totals.length && fallbackTotalResponses > 0
+    ? Math.round((Math.min(...totals) / fallbackTotalResponses) * 100)
+    : 0;
+
+  const totalResponses = stats?.totalResponses ?? fallbackTotalResponses;
+  const completionRate = stats?.completionRate ?? fallbackCompletionRate;
 
   const charts = Object.entries(analytics).map(([key, data]) => {
     const labels = Object.keys(data.counts);
@@ -108,7 +122,32 @@ export default function Analytics({ survey, analytics }: Props) {
   return (
     <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title={`Analitik - ${survey.title}`} />
-      <h1 className="mb-6 text-2xl md:text-3xl font-semibold text-slate-700">Analitik â€” {survey.title}</h1>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-700 md:text-3xl">Analitik – {survey.title}</h1>
+          <p className="text-sm text-slate-500">Ringkasan statistik jawaban responden.</p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            variant="outline"
+            className="border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+            asChild
+          >
+            <a href={routeOr("surveys.analytics.export", survey.id, `/surveys/${survey.id}/analytics/export?format=excel`)}>
+              <Download className="mr-2 size-4" /> Export Excel
+            </a>
+          </Button>
+          <Button
+            variant="outline"
+            className="border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+            asChild
+          >
+            <a href={routeOr("surveys.analytics.export", survey.id, `/surveys/${survey.id}/analytics/export?format=pdf`)}>
+              <Printer className="mr-2 size-4" /> Export PDF
+            </a>
+          </Button>
+        </div>
+      </div>
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <Card className="frost-card">
           <CardHeader className="pb-2">
@@ -116,7 +155,7 @@ export default function Analytics({ survey, analytics }: Props) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold text-slate-700">{totalResponses}</div>
-            <p className="text-xs text-slate-500">Perkiraan total respon</p>
+            <p className="text-xs text-slate-500">Total respon tersimpan</p>
           </CardContent>
         </Card>
         <Card className="frost-card">
@@ -125,7 +164,7 @@ export default function Analytics({ survey, analytics }: Props) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold text-slate-700">{completionRate}%</div>
-            <p className="text-xs text-slate-500">Perkiraan (min/total)</p>
+            <p className="text-xs text-slate-500">Persentase rata-rata pertanyaan terisi</p>
           </CardContent>
         </Card>
       </div>
@@ -139,3 +178,5 @@ export default function Analytics({ survey, analytics }: Props) {
     </AdminLayout>
   );
 }
+
+
