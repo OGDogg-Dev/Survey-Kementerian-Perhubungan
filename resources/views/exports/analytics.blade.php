@@ -24,6 +24,8 @@
         .bar { position: relative; height: 12px; background: #e2e8f0; border-radius: 9999px; overflow: hidden; }
         .bar span { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 100%); border-radius: 9999px; }
         .count, .percent { width: 70px; text-align: right; font-variant-numeric: tabular-nums; }
+        .name-list { margin: 0; padding-left: 20px; color: #0f172a; }
+        .name-list li { margin-bottom: 6px; }
         .no-data { padding: 12px; background: #f1f5f9; color: #64748b; border-radius: 8px; border: 1px dashed #cbd5f5; }
         .footer { margin-top: 32px; font-size: 11px; color: #64748b; }
     </style>
@@ -48,49 +50,63 @@
     @foreach ($analytics as $item)
         @php
             $questionTotal = $item['total'] ?? array_sum($item['counts']);
+            $displayMode = $item['display'] ?? 'distribution';
+            $entries = $item['entries'] ?? [];
         @endphp
         <section class="question">
             <h2>{{ $item['title'] ?? '-' }}</h2>
-            <p class="muted">Total respon kombinasi: {{ $questionTotal }}</p>
 
-            @if (!empty($item['counts']))
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Jawaban</th>
-                            <th class="bar-cell">Visualisasi</th>
-                            <th class="count">Jumlah</th>
-                            <th class="percent">Persentase</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $scale = $questionTotal > 0 ? $questionTotal : 1;
-                        @endphp
-                        @foreach ($item['counts'] as $label => $count)
-                            @php
-                                $percentage = $questionTotal > 0 ? ($count / $questionTotal) * 100 : 0;
-                                $width = max(0.0, min(100.0, $percentage));
-                            @endphp
-                            <tr>
-                                <td>{{ $label }}</td>
-                                <td class="bar-cell">
-                                    <div class="bar">
-                                        <span style="width: {{ number_format($width, 2, '.', '') }}%"></span>
-                                    </div>
-                                </td>
-                                <td class="count">{{ $count }}</td>
-                                <td class="percent">{{ number_format($percentage, 1, ',', '.') }}%</td>
-                            </tr>
+            @if ($displayMode === 'list')
+                <p class="muted">Total jawaban: {{ count($entries) }}</p>
+
+                @if (!empty($entries))
+                    <ol class="name-list">
+                        @foreach ($entries as $entry)
+                            <li>{{ $entry }}</li>
                         @endforeach
-                    </tbody>
-                </table>
+                    </ol>
+                @else
+                    <div class="no-data">Tidak ada data.</div>
+                @endif
             @else
-                <div class="no-data">Tidak ada data.</div>
-            @endif
+                <p class="muted">Total respon kombinasi: {{ $questionTotal }}</p>
 
-            @if (!is_null($item['average']))
-                <p class="muted" style="margin-top: 12px;">Rata-rata nilai: {{ number_format($item['average'], 2, ',', '.') }}</p>
+                @if (!empty($item['counts']))
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Jawaban</th>
+                                <th class="bar-cell">Visualisasi</th>
+                                <th class="count">Jumlah</th>
+                                <th class="percent">Persentase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($item['counts'] as $label => $count)
+                                @php
+                                    $percentage = $questionTotal > 0 ? ($count / $questionTotal) * 100 : 0;
+                                    $width = max(0.0, min(100.0, $percentage));
+                                @endphp
+                                <tr>
+                                    <td>{{ $label }}</td>
+                                    <td class="bar-cell">
+                                        <div class="bar">
+                                            <span style="width: {{ number_format($width, 2, '.', '') }}%"></span>
+                                        </div>
+                                    </td>
+                                    <td class="count">{{ $count }}</td>
+                                    <td class="percent">{{ number_format($percentage, 1, ',', '.') }}%</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <div class="no-data">Tidak ada data.</div>
+                @endif
+
+                @if (!is_null($item['average']))
+                    <p class="muted" style="margin-top: 12px;">Rata-rata nilai: {{ number_format($item['average'], 2, ',', '.') }}</p>
+                @endif
             @endif
         </section>
     @endforeach

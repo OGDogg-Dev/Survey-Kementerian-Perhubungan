@@ -12,6 +12,10 @@ type AnalyticsData = {
   counts: Record<string, number>;
   average: number | null;
   title?: string;
+  entries?: string[];
+  display?: "distribution" | "list";
+  type?: string | null;
+  inputType?: string | null;
 };
 
 type AnalyticsStats = {
@@ -124,7 +128,7 @@ export default function Analytics({ survey, analytics, stats }: Props) {
       <Head title={`Analitik - ${survey.title}`} />
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-700 md:text-3xl">Analitik – {survey.title}</h1>
+          <h1 className="text-2xl font-semibold text-slate-700 md:text-3xl">Analitik {survey.title}</h1>
           <p className="text-sm text-slate-500">Ringkasan statistik jawaban responden.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">

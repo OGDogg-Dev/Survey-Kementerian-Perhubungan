@@ -275,12 +275,17 @@
   .survey-run-card input,
   .survey-run-card textarea,
   .survey-run-card select,
+  .survey-run-card .sv-string-editor,
   .survey-run-card .sd-selectbase { background-color: color-mix(in oklch, var(--background), white 92%) !important; color: var(--foreground) !important; border: 1px solid color-mix(in oklch, var(--border), var(--foreground) 10%) !important; border-radius: 10px !important; transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; min-height: 44px; padding: 10px 12px; box-shadow: inset 0 0 0 1px transparent !important; }
+  .survey-run-card .sv-string-editor { color: var(--foreground) !important; -webkit-text-fill-color: var(--foreground) !important; caret-color: var(--foreground); line-height: 1.5; white-space: pre-wrap; display: block; width: 100%; }
+  .survey-run-card .sv-string-editor * { color: inherit !important; text-decoration-color: inherit !important; -webkit-text-fill-color: inherit !important; }
+
   html.dark .survey-run-card .sd-input,
   html.dark .survey-run-card .sd-text,
   html.dark .survey-run-card input,
   html.dark .survey-run-card textarea,
   html.dark .survey-run-card select,
+  html.dark .survey-run-card .sv-string-editor,
   html.dark .survey-run-card .sd-selectbase { background-color: color-mix(in oklch, var(--background), white 10%) !important; color: var(--foreground) !important; border-color: color-mix(in oklch, var(--border), white 12%) !important; }
   .survey-run-card ::placeholder { color: color-mix(in oklch, var(--foreground), transparent 60%); }
 
@@ -289,12 +294,14 @@
   .survey-run-card input:focus,
   .survey-run-card textarea:focus,
   .survey-run-card select:focus,
+  .survey-run-card .sv-string-editor:focus,
   .survey-run-card .sd-selectbase:focus { outline: none !important; border-color: var(--primary) !important; box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary), transparent 72%) !important; background-color: color-mix(in oklch, var(--background), white 96%) !important; }
   html.dark .survey-run-card .sd-input:focus,
   html.dark .survey-run-card .sd-text:focus,
   html.dark .survey-run-card input:focus,
   html.dark .survey-run-card textarea:focus,
   html.dark .survey-run-card select:focus,
+  html.dark .survey-run-card .sv-string-editor:focus,
   html.dark .survey-run-card .sd-selectbase:focus { background-color: color-mix(in oklch, var(--background), white 12%) !important; }
 
   .survey-run-card input[type='checkbox'],

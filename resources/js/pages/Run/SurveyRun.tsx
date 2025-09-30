@@ -102,6 +102,10 @@ export default function SurveyRun() {
     const ratingAccent = isDark ? "#3BA3F4" : "#1D7FD1";
     const ratingText = isDark ? "#0B1120" : "#FFFFFF";
     const checkMark = isDark ? "#0B1120" : "#FFFFFF";
+    const docStyles = typeof window !== "undefined" ? window.getComputedStyle(document.documentElement) : null;
+    const rootForeground = docStyles?.getPropertyValue("--foreground")?.trim();
+    const fieldTextColor = rootForeground && rootForeground !== "" ? rootForeground : (isDark ? "#E2E8F0" : "#0F172A");
+    const placeholderColor = docStyles?.getPropertyValue("--muted-foreground")?.trim() || secondary;
     const questionGlassBg = isDark
       ? "linear-gradient(150deg, rgba(22,33,55,0.82), rgba(9,17,31,0.68))"
       : "linear-gradient(150deg, rgba(255,255,255,0.88), rgba(237,244,255,0.62))";
@@ -115,6 +119,8 @@ export default function SurveyRun() {
     const highlightBorder = isDark ? "rgba(250,204,21,0.72)" : "rgba(234,179,8,0.75)";
     const highlightSolid = "#FACC15";
     const highlightText = "#0B1120";
+    host.style.setProperty("--sjs-editorfont-color", fieldTextColor);
+    host.style.setProperty("--sjs-editorplaceholdercolor", placeholderColor);
 
     const textSelectors = [
       ".sd-question__title",
@@ -172,7 +178,7 @@ export default function SurveyRun() {
         node.style.setProperty("color", primary, "important");
         node.style.setProperty("--sjs-general-forecolor", primary, "important");
         node.style.setProperty("--sjs-questiontitle-forecolor", primary, "important");
-        node.style.setProperty("--sjs-answer-foreground-color", primary, "important");
+        node.style.setProperty("--sjs-answer-foreground-color", fieldTextColor, "important");
         node.style.removeProperty("opacity");
         node
           .querySelectorAll<HTMLElement>(".sd-question__title, .sd-panel__title, .sd-element__title, .sd-title__text, .sv-string-viewer, .sd-html, .sd-description, .sd-question__description, .sd-item__text, label")
@@ -218,11 +224,13 @@ export default function SurveyRun() {
       });
 
     host
-      .querySelectorAll<HTMLElement>("input, textarea, select, .sd-input, .sd-text, .sd-comment, .sd-selectbase, .sd-html input, .sd-html textarea")
+      .querySelectorAll<HTMLElement>("input, textarea, select, .sd-input, .sd-text, .sd-comment, .sd-selectbase, .sv-string-editor, .sd-html input, .sd-html textarea")
       .forEach((node) => {
-        node.style.setProperty("color", primary, "important");
+        node.style.setProperty("color", fieldTextColor, "important");
+        node.style.setProperty("-webkit-text-fill-color", fieldTextColor, "important");
         node.style.setProperty("background-color", fieldBg, "important");
         node.style.setProperty("border-color", fieldBorder, "important");
+        node.style.setProperty("caret-color", fieldTextColor, "important");
         node.style.removeProperty("opacity");
       });
 
@@ -252,7 +260,7 @@ export default function SurveyRun() {
       node.style.removeProperty("opacity");
       node
         .querySelectorAll<HTMLElement>(".sd-item__text, .sd-checkbox__label, .sd-radio__label")
-        .forEach((label) => label.style.setProperty("color", primary, "important"));
+        .forEach((label) => label.style.setProperty("color", fieldTextColor, "important"));
       const control = node.querySelector<HTMLElement>(".sd-item__control");
       if (control) {
         const controlSize = isCheckbox ? "18px" : "16px";

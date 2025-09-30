@@ -331,17 +331,111 @@ class SurveyController extends Controller
         return response()->json($json);
     }
 
-    public function exportCsv(Survey $survey): StreamedResponse {
-        $filename = 'survey_'.$survey->id.'_responses.csv';
-        $rows = $survey->responses()->orderBy('submitted_at')->get();
-        $headers = ['Content-Type' => 'text/csv', 'Content-Disposition' => "attachment; filename=\"$filename\""];
+    public function exportCsv(Survey $survey): StreamedResponse
+    {
+        $definitions = $this->collectQuestionDefinitions($survey);
+        $responses = $survey->responses()->orderBy('submitted_at')->get(['response_uuid', 'submitted_at', 'answers_json']);
+        $filename = 'survey_' . $survey->id . '_responses.csv';
 
-        return response()->stream(function() use ($rows) {
-            $out = fopen('php://output', 'w');
-            fputcsv($out, ['response_uuid','submitted_at','answers_json']);
-            foreach ($rows as $r) {
-                fputcsv($out, [$r->response_uuid, $r->submitted_at, json_encode($r->answers_json)]);
+        $columns = [];
+
+        foreach ($definitions as $definition) {
+            $columns[$definition['name']] = [
+                'key' => $definition['name'],
+                'title' => $definition['title'],
+                'valueMap' => $definition['valueMap'],
+                'includeComment' => false,
+            ];
+        }
+
+        foreach ($responses as $response) {
+            $answers = is_array($response->answers_json) ? $response->answers_json : [];
+
+            foreach ($answers as $key => $value) {
+                if (!is_string($key) || $key === '') {
+                    continue;
+                }
+
+                if (substr($key, -8) === '-Comment') {
+                    $baseKey = substr($key, 0, -8);
+                    if (!isset($columns[$baseKey])) {
+                        $columns[$baseKey] = [
+                            'key' => $baseKey,
+                            'title' => $baseKey,
+                            'valueMap' => [],
+                            'includeComment' => true,
+                        ];
+                    } else {
+                        $columns[$baseKey]['includeComment'] = true;
+                    }
+                    continue;
+                }
+
+                if (!isset($columns[$key])) {
+                    $columns[$key] = [
+                        'key' => $key,
+                        'title' => $key,
+                        'valueMap' => [],
+                        'includeComment' => false,
+                    ];
+                }
             }
+        }
+
+        $columns = array_values($columns);
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        return response()->stream(function () use ($responses, $columns): void {
+            $out = fopen('php://output', 'w');
+
+            if ($out === false) {
+                return;
+            }
+
+            // Write UTF-8 BOM for Excel compatibility.
+            fwrite($out, "\xEF\xBB\xBF");
+
+            $headerRow = ['response_uuid', 'submitted_at'];
+            foreach ($columns as $column) {
+                $headerRow[] = $column['title'];
+                if ($column['includeComment']) {
+                    $headerRow[] = $column['title'] . ' (Catatan)';
+                }
+            }
+            fputcsv($out, $headerRow);
+
+            foreach ($responses as $response) {
+                $answers = is_array($response->answers_json) ? $response->answers_json : [];
+
+                $row = [
+                    $response->response_uuid,
+                    $response->submitted_at ? $response->submitted_at->format('Y-m-d H:i:s') : '',
+                ];
+
+                foreach ($columns as $column) {
+                    $value = '';
+                    if (array_key_exists($column['key'], $answers)) {
+                        $value = $this->presentAnswerValue($answers[$column['key']], $column['valueMap']);
+                    }
+                    $row[] = $value;
+
+                    if ($column['includeComment']) {
+                        $commentKey = $column['key'] . '-Comment';
+                        $comment = '';
+                        if (array_key_exists($commentKey, $answers)) {
+                            $comment = $this->presentAnswerValue($answers[$commentKey], []);
+                        }
+                        $row[] = $comment;
+                    }
+                }
+
+                fputcsv($out, $row);
+            }
+
             fclose($out);
         }, 200, $headers);
     }
@@ -351,3 +445,4 @@ class SurveyController extends Controller
         return redirect()->route('surveys.index')->with('ok', 'Survei dihapus');
     }
 }
+
